@@ -1,0 +1,897 @@
+import 'package:flutter/material.dart';
+import 'package:fl_chart/fl_chart.dart';
+import '../services/api_service.dart';
+import '../services/app_session.dart';
+import '../components/skeleton.dart';
+
+// ── Model ──────────────────────────────────────────────
+class _Semester {
+  final int id;
+  final String ma;
+  final String ten;
+  const _Semester({required this.id, required this.ma, required this.ten});
+}
+
+class _LopItem {
+  final int lmhid;
+  final String lmhma;
+  final String mhma;
+  final String mhten;
+  final int sotinchi;
+  final int tylecc;
+  final int tylegk;
+  final int tyleck;
+  final String gvten;
+  final String? decuong;
+  final double? tongdiem;
+  final double? diemcc;
+  final double? diemgk;
+  final double? diemck;
+
+  _LopItem.fromJson(Map<String, dynamic> j)
+      : lmhid = j['lmhid'] as int? ?? 0,
+        lmhma = j['lmhma'] as String? ?? '',
+        mhma = j['mhma'] as String? ?? '',
+        mhten = j['mhten'] as String? ?? '',
+        sotinchi = j['sotinchi'] as int? ?? 0,
+        tylecc = j['tylecc'] as int? ?? 0,
+        tylegk = j['tylegk'] as int? ?? 0,
+        tyleck = j['tyleck'] as int? ?? 0,
+        gvten = j['gvten'] as String? ?? '',
+        decuong = j['decuong'] as String?,
+        tongdiem = (j['tongdiem'] as num?)?.toDouble(),
+        diemcc = (j['diemcc'] as num?)?.toDouble(),
+        diemgk = (j['diemgk'] as num?)?.toDouble(),
+        diemck = (j['diemck'] as num?)?.toDouble();
+}
+
+// ── Screen ─────────────────────────────────────────────
+class ClassesScreen extends StatefulWidget {
+  const ClassesScreen({super.key});
+
+  @override
+  State<ClassesScreen> createState() => _ClassesScreenState();
+}
+
+class _ClassesScreenState extends State<ClassesScreen> {
+  List<_Semester> _semesters = [];
+  List<_LopItem> _classes = [];
+  _Semester? _selected;
+  bool _loading = true;
+  bool _loadingClasses = false;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchSemesters();
+  }
+
+  Future<void> _fetchSemesters() async {
+    setState(() { _loading = true; _error = null; });
+    try {
+      final data = await ApiService.getHocKy();
+      final sems = data
+          .map((e) => _Semester(
+                id: e['id'] as int,
+                ma: e['ma'] as String? ?? '',
+                ten: e['ten'] as String? ?? '',
+              ))
+          .toList();
+      // Sắp xếp mới nhất trước (id lớn hơn = mới hơn)
+      sems.sort((a, b) => b.id.compareTo(a.id));
+      if (!mounted) return;
+      setState(() {
+        _semesters = sems;
+        _loading = false;
+      });
+      if (sems.isNotEmpty) _selectSemester(sems.first);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() { _loading = false; _error = e.toString(); });
+    }
+  }
+
+  Future<void> _selectSemester(_Semester sem) async {
+    setState(() { _selected = sem; _loadingClasses = true; _classes = []; });
+    try {
+      final data = await ApiService.getLopMonHoc(sem.id);
+      if (!mounted) return;
+      setState(() {
+        _classes = data
+            .map((e) => _LopItem.fromJson(e as Map<String, dynamic>))
+            .toList();
+        _loadingClasses = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() { _loadingClasses = false; });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.grey[100],
+      body: Column(
+        children: [
+          // ── Header ──
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.fromLTRB(16, 48, 16, 20),
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFFFF8C00), Color(0xFFFFB347)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius:
+                  BorderRadius.vertical(bottom: Radius.circular(24)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: const Icon(Icons.arrow_back_ios,
+                          color: Colors.white, size: 20),
+                    ),
+                    const SizedBox(width: 8),
+                    const Text(
+                      'Lớp học',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'MSSV: ${AppSession.instance.hocVien?.mshv ?? ''}',
+                  style: const TextStyle(color: Colors.white70, fontSize: 13),
+                ),
+                const SizedBox(height: 16),
+                if (!_loading && _semesters.isNotEmpty)
+                  SizedBox(
+                    height: 36,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: _semesters.length,
+                      itemBuilder: (context, i) {
+                        final sem = _semesters[i];
+                        final isSelected = sem.id == _selected?.id;
+                        return GestureDetector(
+                          onTap: () => _selectSemester(sem),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            margin: const EdgeInsets.only(right: 10),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? Colors.white
+                                  : Colors.white.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              sem.ten,
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: isSelected
+                                    ? Colors.orange
+                                    : Colors.white,
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+              ],
+            ),
+          ),
+
+          // ── Content ──
+          Expanded(
+            child: _loading
+                ? skeletonList(accentColor: Colors.orange)
+                : _error != null
+                    ? Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.error_outline,
+                                size: 48, color: Colors.grey),
+                            const SizedBox(height: 12),
+                            Text(_error!,
+                                style: const TextStyle(color: Colors.grey)),
+                            const SizedBox(height: 16),
+                            ElevatedButton(
+                              onPressed: _fetchSemesters,
+                              style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.orange),
+                              child: const Text('Thử lại',
+                                  style: TextStyle(color: Colors.white)),
+                            ),
+                          ],
+                        ),
+                      )
+                    : _loadingClasses
+                        ? skeletonList(accentColor: Colors.orange)
+                        : _classes.isEmpty
+                            ? const Center(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.school_outlined,
+                                        size: 64, color: Colors.grey),
+                                    SizedBox(height: 12),
+                                    Text('Không có lớp học',
+                                        style:
+                                            TextStyle(color: Colors.grey)),
+                                  ],
+                                ),
+                              )
+                            : Column(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.fromLTRB(
+                                        16, 14, 16, 4),
+                                    child: Row(
+                                      children: [
+                                        Text(
+                                          '${_classes.length} lớp học',
+                                          style: const TextStyle(
+                                              fontSize: 13,
+                                              color: Colors.grey),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: ListView.builder(
+                                      padding: const EdgeInsets.fromLTRB(
+                                          16, 4, 16, 24),
+                                      itemCount: _classes.length,
+                                      itemBuilder: (context, i) =>
+                                          _ClassCard(
+                                        item: _classes[i],
+                                        semTen: _selected?.ten ?? '',
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Class Card ─────────────────────────────────────────
+class _ClassCard extends StatelessWidget {
+  final _LopItem item;
+  final String semTen;
+  const _ClassCard({required this.item, required this.semTen});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (_) =>
+                _ClassDetailScreen(item: item, semTen: semTen)),
+      ),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: const [
+            BoxShadow(
+                color: Colors.black12,
+                blurRadius: 6,
+                offset: Offset(0, 3)),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 5,
+              height: 96,
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Color(0xFFFF8C00), Color(0xFFFFB347)],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                ),
+                borderRadius:
+                    BorderRadius.horizontal(left: Radius.circular(16)),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            item.mhten,
+                            style: const TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        if (item.sotinchi > 0)
+                          Container(
+                            margin: const EdgeInsets.only(right: 12),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color:
+                                  Colors.orange.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              '${item.sotinchi} TC',
+                              style: const TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.orange),
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 5),
+                    Row(
+                      children: [
+                        const Icon(Icons.person_outline,
+                            size: 13, color: Colors.orange),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(item.gvten,
+                              style: const TextStyle(
+                                  fontSize: 12, color: Colors.grey)),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        const Icon(Icons.tag,
+                            size: 13, color: Colors.orange),
+                        const SizedBox(width: 4),
+                        Text(item.lmhma,
+                            style: const TextStyle(
+                                fontSize: 12, color: Colors.grey)),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _tyLeLabel(_LopItem item) {
+    final parts = <String>[];
+    if (item.tylecc > 0) parts.add('CC ${item.tylecc}%');
+    if (item.tylegk > 0) parts.add('GK ${item.tylegk}%');
+    if (item.tyleck > 0) parts.add('CK ${item.tyleck}%');
+    return parts.join(' · ');
+  }
+}
+
+// ── Detail Screen ──────────────────────────────────────
+class _ClassDetailScreen extends StatefulWidget {
+  final _LopItem item;
+  final String semTen;
+  const _ClassDetailScreen({required this.item, required this.semTen});
+
+  @override
+  State<_ClassDetailScreen> createState() => _ClassDetailScreenState();
+}
+
+class _ClassDetailScreenState extends State<_ClassDetailScreen> {
+  List<Map<String, dynamic>> _sessions = [];
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchBuoiHoc();
+  }
+
+  Future<void> _fetchBuoiHoc() async {
+    try {
+      final data = await ApiService.getBuoiHoc(widget.item.lmhid);
+      if (!mounted) return;
+      final sessions = data
+          .map((e) => e as Map<String, dynamic>)
+          .toList()
+        ..sort((a, b) {
+          final da = DateTime.tryParse(a['ngay'] as String? ?? '') ?? DateTime(0);
+          final db = DateTime.tryParse(b['ngay'] as String? ?? '') ?? DateTime(0);
+          return da.compareTo(db);
+        });
+      setState(() { _sessions = sessions; _loading = false; });
+    } catch (_) {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  int get _present => _sessions.where((s) => s['hiendienyn'] == true).length;
+  int get _absent  => _sessions.where((s) => s['hiendienyn'] == false).length;
+  int get _pending => _sessions.where((s) => s['hiendienyn'] == null).length;
+
+  bool get _hasGrades =>
+      widget.item.tongdiem != null ||
+      widget.item.diemcc != null ||
+      widget.item.diemgk != null ||
+      widget.item.diemck != null;
+
+  @override
+  Widget build(BuildContext context) {
+    final item = widget.item;
+    return Scaffold(
+      backgroundColor: Colors.grey[100],
+      body: Column(
+        children: [
+          // Header
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.fromLTRB(16, 48, 16, 20),
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFFFF8C00), Color(0xFFFFB347)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.vertical(bottom: Radius.circular(24)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                GestureDetector(
+                  onTap: () => Navigator.pop(context),
+                  child: const Icon(Icons.arrow_back_ios,
+                      color: Colors.white, size: 20),
+                ),
+                const SizedBox(height: 10),
+                Text(item.mhten,
+                    style: const TextStyle(
+                        fontSize: 19,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white)),
+                const SizedBox(height: 4),
+                Text(widget.semTen,
+                    style: const TextStyle(
+                        color: Colors.white70, fontSize: 13)),
+              ],
+            ),
+          ),
+          Expanded(
+            child: _loading
+                ? const Center(
+                    child: CircularProgressIndicator(color: Colors.orange))
+                : SingleChildScrollView(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      children: [
+                        _infoCard(item),
+                        const SizedBox(height: 16),
+                        if (_hasGrades) ...[
+                          _gradeCard(item),
+                          const SizedBox(height: 16),
+                        ],
+                        if (_sessions.isNotEmpty) ...[
+                          _attendanceCard(),
+                          const SizedBox(height: 16),
+                          _sessionListCard(),
+                        ],
+                      ],
+                    ),
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _infoCard(_LopItem item) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: const [
+          BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 3)),
+        ],
+      ),
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Column(
+        children: [
+          _Row(Icons.tag, 'Mã lớp', item.lmhma),
+          _divider(),
+          _Row(Icons.book_outlined, 'Mã môn', item.mhma),
+          _divider(),
+          _Row(Icons.school_outlined, 'Tín chỉ', '${item.sotinchi} TC'),
+          _divider(),
+          _Row(Icons.person_outline, 'Giảng viên', item.gvten),
+        ],
+      ),
+    );
+  }
+
+  Widget _gradeCard(_LopItem item) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: const [
+          BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 3)),
+        ],
+      ),
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('Điểm số',
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              if (item.diemcc != null)
+                Expanded(child: _ScoreBox('Chuyên cần', item.diemcc!)),
+              if (item.diemgk != null) ...[
+                const SizedBox(width: 10),
+                Expanded(child: _ScoreBox('Giữa kỳ', item.diemgk!)),
+              ],
+              if (item.diemck != null) ...[
+                const SizedBox(width: 10),
+                Expanded(child: _ScoreBox('Cuối kỳ', item.diemck!)),
+              ],
+            ],
+          ),
+          if (item.tongdiem != null) ...[
+            const SizedBox(height: 14),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFFFF8C00), Color(0xFFFFB347)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: [
+                  const Text('Tổng kết',
+                      style: TextStyle(color: Colors.white70, fontSize: 13)),
+                  const Spacer(),
+                  Text(item.tongdiem!.toStringAsFixed(1),
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold)),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _attendanceCard() {
+    final total = _sessions.length;
+    final pct = total > 0 ? (_present / total * 100).round() : 0;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: const [
+          BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 3)),
+        ],
+      ),
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('Thống kê điểm danh',
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 20),
+          Row(
+            children: [
+              // Donut chart
+              SizedBox(
+                width: 130,
+                height: 130,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    PieChart(
+                      PieChartData(
+                        sectionsSpace: 2,
+                        centerSpaceRadius: 36,
+                        startDegreeOffset: -90,
+                        sections: [
+                          if (_present > 0)
+                            PieChartSectionData(
+                              value: _present.toDouble(),
+                              color: const Color(0xFF4CAF50),
+                              radius: 28,
+                              showTitle: false,
+                            ),
+                          if (_absent > 0)
+                            PieChartSectionData(
+                              value: _absent.toDouble(),
+                              color: const Color(0xFFF44336),
+                              radius: 28,
+                              showTitle: false,
+                            ),
+                          if (_pending > 0)
+                            PieChartSectionData(
+                              value: _pending.toDouble(),
+                              color: const Color(0xFFBDBDBD),
+                              radius: 28,
+                              showTitle: false,
+                            ),
+                        ],
+                      ),
+                    ),
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text('$pct%',
+                            style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black87)),
+                        const Text('có mặt',
+                            style: TextStyle(fontSize: 10, color: Colors.grey)),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 20),
+              // Legend
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _LegendRow(const Color(0xFF4CAF50), 'Có mặt', _present, total),
+                    const SizedBox(height: 10),
+                    _LegendRow(const Color(0xFFF44336), 'Vắng mặt', _absent, total),
+                    const SizedBox(height: 10),
+                    _LegendRow(const Color(0xFFBDBDBD), 'Chưa điểm danh', _pending, total),
+                    const Divider(height: 20),
+                    Row(
+                      children: [
+                        const Icon(Icons.layers_outlined,
+                            size: 15, color: Colors.orange),
+                        const SizedBox(width: 6),
+                        Text('Tổng: $total buổi',
+                            style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600)),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _sessionListCard() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: const [
+          BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 3)),
+        ],
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('Chi tiết các buổi học',
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 12),
+          ..._sessions.asMap().entries.map((e) {
+            final i = e.key;
+            final s = e.value;
+            final ngay = DateTime.tryParse(s['ngay'] as String? ?? '');
+            final dateStr = ngay != null
+                ? '${ngay.day.toString().padLeft(2, '0')}/${ngay.month.toString().padLeft(2, '0')}/${ngay.year}'
+                : '';
+            //final start = s['thoigianbd'] as String? ?? '';
+            final hiendien = s['hiendienyn'];
+            final baonghi = s['baonghiyn'];
+
+            final (label, color, bg, icon) = hiendien == true
+                ? ('Có mặt', const Color(0xFF4CAF50), const Color(0xFFE8F5E9), Icons.check_circle_outline)
+                : hiendien == false
+                    ? ('Vắng mặt', const Color(0xFFF44336), const Color(0xFFFFEBEE), Icons.cancel_outlined)
+                    : baonghi == true
+                        ? ('Báo nghỉ', Colors.orange, const Color(0xFFFFF3E0), Icons.event_busy_outlined)
+                        : ('Chưa điểm danh', const Color(0xFF9E9E9E), const Color(0xFFF5F5F5), Icons.radio_button_unchecked);
+
+            return Column(
+              children: [
+                if (i > 0) const Divider(height: 1, color: Color(0xFFF0F0F0)),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  child: Row(
+                    children: [
+                      Text('Buổi ${i + 1}',
+                          style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.grey)),
+                      const SizedBox(width: 10),
+                      const Icon(Icons.calendar_today,
+                          size: 12, color: Colors.orange),
+                      const SizedBox(width: 4),
+                      Text(dateStr,
+                          style: const TextStyle(
+                              fontSize: 12, color: Colors.grey)),
+                      // if (start.isNotEmpty) ...[
+                      //   const SizedBox(width: 8),
+                      //   const Icon(Icons.access_time,
+                      //       size: 12, color: Colors.orange),
+                      //   const SizedBox(width: 4),
+                      //   Text(start,
+                      //       style: const TextStyle(
+                      //           fontSize: 12, color: Colors.grey)),
+                      // ],
+                      const Spacer(),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: bg,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(icon, size: 12, color: color),
+                            const SizedBox(width: 4),
+                            Text(label,
+                                style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    color: color)),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            );
+          }),
+        ],
+      ),
+    );
+  }
+
+  Widget _divider() => const Divider(
+      height: 1, indent: 48, endIndent: 16, color: Color(0xFFF0F0F0));
+}
+
+class _Row extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+  const _Row(this.icon, this.label, this.value);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Row(
+        children: [
+          Icon(icon, color: Colors.orange, size: 20),
+          const SizedBox(width: 12),
+          SizedBox(
+            width: 88,
+            child: Text(label,
+                style:
+                    const TextStyle(fontSize: 13, color: Colors.grey)),
+          ),
+          Expanded(
+            child: Text(value,
+                style: const TextStyle(
+                    fontSize: 14, fontWeight: FontWeight.w600)),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LegendRow extends StatelessWidget {
+  final Color color;
+  final String label;
+  final int count;
+  final int total;
+  const _LegendRow(this.color, this.label, this.count, this.total);
+
+  @override
+  Widget build(BuildContext context) {
+    final pct = total > 0 ? (count / total * 100).round() : 0;
+    return Row(
+      children: [
+        Container(
+          width: 11, height: 11,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(label,
+              style: const TextStyle(fontSize: 12, color: Colors.grey)),
+        ),
+        Text('$count  ($pct%)',
+            style: TextStyle(
+                fontSize: 12, fontWeight: FontWeight.w600, color: color)),
+      ],
+    );
+  }
+}
+
+class _ScoreBox extends StatelessWidget {
+  final String label;
+  final double value;
+  const _ScoreBox(this.label, this.value);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.grey.withValues(alpha: 0.07),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        children: [
+          Text(
+            value % 1 == 0
+                ? value.toInt().toString()
+                : value.toString(),
+            style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87),
+          ),
+          const SizedBox(height: 4),
+          Text(label,
+              style:
+                  const TextStyle(fontSize: 11, color: Colors.grey)),
+        ],
+      ),
+    );
+  }
+}
