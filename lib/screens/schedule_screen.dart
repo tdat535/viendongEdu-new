@@ -31,6 +31,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
   // Cache kết quả theo ngày để không gọi API lại
   final Map<String, List<Map<String, dynamic>>> _cache = {};
   bool _loading = false;
+  final ScrollController _chipScroll = ScrollController();
 
   @override
   void initState() {
@@ -39,6 +40,28 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     _currentMonday = _findMonday(now);
     _selectedDate = now;
     _fetchDate(now);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToSelected());
+  }
+
+  @override
+  void dispose() {
+    _chipScroll.dispose();
+    super.dispose();
+  }
+
+  void _scrollToSelected() {
+    if (!_chipScroll.hasClients) return;
+    final weekDays = _weekDays;
+    int index = weekDays.indexWhere((d) => _fmtDate(d) == _fmtDate(_selectedDate));
+    if (index == -1) return;
+    const chipWidth = 60.0;
+    const chipMargin = 8.0;
+    final chipOffset = index * (chipWidth + chipMargin);
+    final viewport = _chipScroll.position.viewportDimension;
+    final center = (chipOffset - viewport / 2 + chipWidth / 2)
+        .clamp(0.0, _chipScroll.position.maxScrollExtent);
+    _chipScroll.animateTo(center,
+        duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
   }
 
   DateTime _findMonday(DateTime d) =>
@@ -69,18 +92,21 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
   void _selectDate(DateTime date) {
     setState(() => _selectedDate = date);
     _fetchDate(date);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToSelected());
   }
 
   void _prevWeek() {
     setState(() {
       _currentMonday = _currentMonday.subtract(const Duration(days: 7));
     });
+    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToSelected());
   }
 
   void _nextWeek() {
     setState(() {
       _currentMonday = _currentMonday.add(const Duration(days: 7));
     });
+    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToSelected());
   }
 
   Future<void> _pickDate() async {
@@ -103,6 +129,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
         _currentMonday = _findMonday(picked);
       });
       _fetchDate(picked);
+      WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToSelected());
     }
   }
 
@@ -197,6 +224,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                 SizedBox(
                   height: 84,
                   child: ListView.builder(
+                    controller: _chipScroll,
                     scrollDirection: Axis.horizontal,
                     itemCount: weekDays.length,
                     itemBuilder: (context, i) {

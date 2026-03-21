@@ -17,12 +17,35 @@ class _GvScheduleScreenState extends State<GvScheduleScreen> {
   List<Map<String, dynamic>> _classes = [];
   bool _loading = true;
   String? _error;
+  final ScrollController _chipScroll = ScrollController();
 
   @override
   void initState() {
     super.initState();
     _currentMonday = _findMonday(DateTime.now());
     _fetch(_selectedDate);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToSelected());
+  }
+
+  @override
+  void dispose() {
+    _chipScroll.dispose();
+    super.dispose();
+  }
+
+  void _scrollToSelected() {
+    if (!_chipScroll.hasClients) return;
+    final weekDays = _weekDays;
+    int index = weekDays.indexWhere((d) => _fmtDate(d) == _fmtDate(_selectedDate));
+    if (index == -1) return;
+    const chipWidth = 60.0;
+    const chipMargin = 8.0;
+    final chipOffset = index * (chipWidth + chipMargin);
+    final viewport = _chipScroll.position.viewportDimension;
+    final center = (chipOffset - viewport / 2 + chipWidth / 2)
+        .clamp(0.0, _chipScroll.position.maxScrollExtent);
+    _chipScroll.animateTo(center,
+        duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
   }
 
   Future<void> _fetch(DateTime date) async {
@@ -47,11 +70,20 @@ class _GvScheduleScreenState extends State<GvScheduleScreen> {
   String _fmtDate(DateTime d) =>
       '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
 
-  void _prevWeek() => setState(() => _currentMonday = _currentMonday.subtract(const Duration(days: 7)));
-  void _nextWeek() => setState(() => _currentMonday = _currentMonday.add(const Duration(days: 7)));
+  void _prevWeek() {
+    setState(() => _currentMonday = _currentMonday.subtract(const Duration(days: 7)));
+    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToSelected());
+  }
+
+  void _nextWeek() {
+    setState(() => _currentMonday = _currentMonday.add(const Duration(days: 7)));
+    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToSelected());
+  }
+
   void _selectDate(DateTime date) {
     setState(() => _selectedDate = date);
     _fetch(date);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToSelected());
   }
 
   Future<void> _pickDate() async {
@@ -71,6 +103,7 @@ class _GvScheduleScreenState extends State<GvScheduleScreen> {
     if (picked != null) {
       setState(() => _currentMonday = _findMonday(picked));
       _selectDate(picked);
+      WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToSelected());
     }
   }
 
@@ -157,6 +190,7 @@ class _GvScheduleScreenState extends State<GvScheduleScreen> {
                 SizedBox(
                   height: 84,
                   child: ListView.builder(
+                    controller: _chipScroll,
                     scrollDirection: Axis.horizontal,
                     itemCount: _weekDays.length,
                     itemBuilder: (context, i) {
