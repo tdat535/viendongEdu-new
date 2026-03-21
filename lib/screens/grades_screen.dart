@@ -143,6 +143,7 @@ class _GradesScreenState extends State<GradesScreen>
                   indicatorWeight: 3,
                   labelColor: Colors.white,
                   unselectedLabelColor: Colors.white60,
+                  labelPadding: const EdgeInsets.symmetric(horizontal: 8),
                   labelStyle: const TextStyle(
                       fontSize: 14, fontWeight: FontWeight.w600),
                   tabs: const [
@@ -848,41 +849,43 @@ class _Chip extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
         decoration: BoxDecoration(
           color: selected ? color : Colors.white,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(color: selected ? color : Colors.grey[300]!),
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.max,
-          children: [
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: selected ? Colors.white : Colors.grey[600],
-              ),
-            ),
-            const SizedBox(width: 6),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-              decoration: BoxDecoration(
-                color: selected ? Colors.white.withValues(alpha: 0.25) : Colors.grey[100],
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Text(
-                '$count',
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                label,
                 style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
                   color: selected ? Colors.white : Colors.grey[600],
                 ),
               ),
-            ),
-          ],
+              const SizedBox(width: 6),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                decoration: BoxDecoration(
+                  color: selected ? Colors.white.withValues(alpha: 0.25) : Colors.grey[100],
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  '$count',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    color: selected ? Colors.white : Colors.grey[600],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -903,7 +906,7 @@ class _ChuaHocTab extends StatelessWidget {
           children: [
             Icon(Icons.hourglass_empty_rounded, size: 64, color: Colors.grey),
             SizedBox(height: 12),
-            Text('Không có môn chưa có điểm',
+            Text('Không còn môn chưa có điểm',
                 style: TextStyle(color: Colors.grey)),
           ],
         ),
@@ -1028,7 +1031,7 @@ class _ChuaDatTab extends StatelessWidget {
           children: [
             Icon(Icons.hourglass_empty_rounded, size: 64, color: Colors.grey),
             SizedBox(height: 12),
-            Text('Không có môn chưa học',
+            Text('Không còn môn chưa học',
                 style: TextStyle(color: Colors.grey)),
           ],
         ),

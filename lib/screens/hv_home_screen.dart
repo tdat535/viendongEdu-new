@@ -432,6 +432,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                     ),
+                    textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 6),
                   Text(
@@ -500,23 +501,25 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: const Icon(Icons.person, color: Colors.white, size: 36),
                   ),
                   const SizedBox(width: 16),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        _name,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _name,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        _mssv,
-                        style: const TextStyle(fontSize: 14, color: Colors.white70),
-                      ),
-                    ],
+                        const SizedBox(height: 4),
+                        Text(
+                          _mssv,
+                          style: const TextStyle(fontSize: 14, color: Colors.white70),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),

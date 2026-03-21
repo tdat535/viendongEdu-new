@@ -13,6 +13,7 @@ class GvScheduleScreen extends StatefulWidget {
 
 class _GvScheduleScreenState extends State<GvScheduleScreen> {
   DateTime _selectedDate = DateTime.now();
+  late DateTime _currentMonday;
   List<Map<String, dynamic>> _classes = [];
   bool _loading = true;
   String? _error;
@@ -20,6 +21,7 @@ class _GvScheduleScreenState extends State<GvScheduleScreen> {
   @override
   void initState() {
     super.initState();
+    _currentMonday = _findMonday(DateTime.now());
     _fetch(_selectedDate);
   }
 
@@ -40,12 +42,25 @@ class _GvScheduleScreenState extends State<GvScheduleScreen> {
     }
   }
 
+  DateTime _findMonday(DateTime d) => d.subtract(Duration(days: d.weekday - 1));
+  List<DateTime> get _weekDays => List.generate(7, (i) => _currentMonday.add(Duration(days: i)));
+  String _fmtDate(DateTime d) =>
+      '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+
+  void _prevWeek() => setState(() => _currentMonday = _currentMonday.subtract(const Duration(days: 7)));
+  void _nextWeek() => setState(() => _currentMonday = _currentMonday.add(const Duration(days: 7)));
+  void _selectDate(DateTime date) {
+    setState(() => _selectedDate = date);
+    _fetch(date);
+  }
+
   Future<void> _pickDate() async {
     final picked = await showDatePicker(
       context: context,
       initialDate: _selectedDate,
       firstDate: DateTime(2020),
       lastDate: DateTime(2030),
+      locale: const Locale('vi', 'VN'),
       builder: (ctx, child) => Theme(
         data: Theme.of(ctx).copyWith(
           colorScheme: const ColorScheme.light(primary: Color(0xFFE65100)),
@@ -53,26 +68,25 @@ class _GvScheduleScreenState extends State<GvScheduleScreen> {
         child: child!,
       ),
     );
-    if (picked != null && picked != _selectedDate) {
-      setState(() => _selectedDate = picked);
-      _fetch(picked);
+    if (picked != null) {
+      setState(() => _currentMonday = _findMonday(picked));
+      _selectDate(picked);
     }
-  }
-
-  String get _dateLabel {
-    final weekdays = [
-      '', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ nhật'
-    ];
-    return '${weekdays[_selectedDate.weekday]}, '
-        '${_selectedDate.day.toString().padLeft(2, '0')}/'
-        '${_selectedDate.month.toString().padLeft(2, '0')}/'
-        '${_selectedDate.year}';
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100],
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _pickDate,
+        backgroundColor: const Color(0xFFE65100),
+        icon: const Icon(Icons.calendar_month, color: Colors.white, size: 20),
+        label: Text(
+          '${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
+          style: const TextStyle(color: Colors.white, fontSize: 13),
+        ),
+      ),
       body: SafeArea(top: false, child: Column(
         children: [
           // ── Header ──
@@ -110,35 +124,98 @@ class _GvScheduleScreenState extends State<GvScheduleScreen> {
                   ],
                 ),
                 const SizedBox(height: 16),
-                // Date picker button
-                GestureDetector(
-                  onTap: _pickDate,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 10),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(12),
+                // Week navigator
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    GestureDetector(
+                      onTap: _prevWeek,
+                      child: const Icon(Icons.chevron_left,
+                          color: Colors.white, size: 28),
                     ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.calendar_today,
-                            color: Colors.white, size: 16),
-                        const SizedBox(width: 8),
-                        Text(
-                          _dateLabel,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
+                    Text(
+                      () {
+                        final s = _currentMonday;
+                        final e = _currentMonday.add(const Duration(days: 6));
+                        return '${s.day}/${s.month} – ${e.day}/${e.month}/${e.year}';
+                      }(),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: _nextWeek,
+                      child: const Icon(Icons.chevron_right,
+                          color: Colors.white, size: 28),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                // Day chips
+                SizedBox(
+                  height: 84,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: _weekDays.length,
+                    itemBuilder: (context, i) {
+                      final day = _weekDays[i];
+                      final isSelected = _fmtDate(day) == _fmtDate(_selectedDate);
+                      final isToday = _fmtDate(day) == _fmtDate(DateTime.now());
+                      return GestureDetector(
+                        onTap: () => _selectDate(day),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          width: 60,
+                          margin: const EdgeInsets.only(right: 8),
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? Colors.white
+                                : Colors.white.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                ['T2','T3','T4','T5','T6','T7','CN'][day.weekday - 1],
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: isSelected
+                                      ? const Color(0xFFE65100)
+                                      : Colors.white,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                '${day.day}',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: isSelected
+                                      ? const Color(0xFFE65100)
+                                      : Colors.white,
+                                ),
+                              ),
+                              if (isToday)
+                                Container(
+                                  width: 6,
+                                  height: 6,
+                                  margin: const EdgeInsets.only(top: 3),
+                                  decoration: BoxDecoration(
+                                    color: isSelected
+                                        ? const Color(0xFFE65100)
+                                        : Colors.white,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                            ],
                           ),
                         ),
-                        const SizedBox(width: 8),
-                        const Icon(Icons.arrow_drop_down,
-                            color: Colors.white, size: 20),
-                      ],
-                    ),
+                      );
+                    },
                   ),
                 ),
               ],

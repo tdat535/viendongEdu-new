@@ -259,7 +259,8 @@ class _GvHomeScreenState extends State<GvHomeScreen> {
                       color: Colors.white, size: 32),
                 ),
                 const SizedBox(width: 14),
-                Column(
+                Expanded(
+                  child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
@@ -295,6 +296,7 @@ class _GvHomeScreenState extends State<GvHomeScreen> {
                       ),
                     ],
                   ],
+                  ),
                 ),
               ],
             ),
@@ -377,23 +379,27 @@ class _GvHomeScreenState extends State<GvHomeScreen> {
                     child: const Icon(Icons.person, color: Colors.white, size: 36),
                   ),
                   const SizedBox(width: 16),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        gv?.ten ?? '–',
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          gv?.ten ?? '–',
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
                         ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        userid,
-                        style: const TextStyle(fontSize: 14, color: Colors.white70),
-                      ),
-                    ],
+                        const SizedBox(height: 4),
+                        Text(
+                          userid,
+                          style: const TextStyle(fontSize: 14, color: Colors.white70),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),

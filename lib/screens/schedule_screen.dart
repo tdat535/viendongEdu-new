@@ -83,6 +83,29 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     });
   }
 
+  Future<void> _pickDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2030),
+      locale: const Locale('vi', 'VN'),
+      builder: (ctx, child) => Theme(
+        data: Theme.of(ctx).copyWith(
+          colorScheme: const ColorScheme.light(primary: Color(0xFFE65100)),
+        ),
+        child: child!,
+      ),
+    );
+    if (picked != null) {
+      setState(() {
+        _selectedDate = picked;
+        _currentMonday = _findMonday(picked);
+      });
+      _fetchDate(picked);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final weekDays = _weekDays;
@@ -96,6 +119,15 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
 
     return Scaffold(
       backgroundColor: Colors.grey[100],
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _pickDate,
+        backgroundColor: const Color(0xFFE65100),
+        icon: const Icon(Icons.calendar_month, color: Colors.white, size: 20),
+        label: Text(
+          '${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
+          style: const TextStyle(color: Colors.white, fontSize: 13),
+        ),
+      ),
       body: SafeArea(top: false, child: Column(
         children: [
           // ── Header ──
@@ -163,7 +195,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
 
                 // Day chips
                 SizedBox(
-                  height: 68,
+                  height: 84,
                   child: ListView.builder(
                     scrollDirection: Axis.horizontal,
                     itemCount: weekDays.length,
@@ -175,13 +207,13 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                         onTap: () => _selectDate(day),
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 200),
-                          width: 44,
+                          width: 60,
                           margin: const EdgeInsets.only(right: 8),
                           decoration: BoxDecoration(
                             color: isSelected
                                 ? Colors.white
                                 : Colors.white.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(14),
+                            borderRadius: BorderRadius.circular(16),
                           ),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -189,10 +221,10 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                               Text(
                                 ['T2','T3','T4','T5','T6','T7','CN'][day.weekday - 1],
                                 style: TextStyle(
-                                  fontSize: 11,
+                                  fontSize: 13,
                                   fontWeight: FontWeight.w600,
                                   color: isSelected
-                                      ? Color(0xFFE65100)
+                                      ? const Color(0xFFE65100)
                                       : Colors.white,
                                 ),
                               ),
@@ -200,21 +232,21 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                               Text(
                                 '${day.day}',
                                 style: TextStyle(
-                                  fontSize: 16,
+                                  fontSize: 20,
                                   fontWeight: FontWeight.bold,
                                   color: isSelected
-                                      ? Color(0xFFE65100)
+                                      ? const Color(0xFFE65100)
                                       : Colors.white,
                                 ),
                               ),
                               if (isToday)
                                 Container(
-                                  width: 5,
-                                  height: 5,
-                                  margin: const EdgeInsets.only(top: 2),
+                                  width: 6,
+                                  height: 6,
+                                  margin: const EdgeInsets.only(top: 3),
                                   decoration: BoxDecoration(
                                     color: isSelected
-                                        ? Color(0xFFE65100)
+                                        ? const Color(0xFFE65100)
                                         : Colors.white,
                                     shape: BoxShape.circle,
                                   ),

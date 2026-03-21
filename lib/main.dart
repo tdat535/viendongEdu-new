@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'screens/splash_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/hv_home_screen.dart';
@@ -27,6 +28,16 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'ViendongEdu',
       theme: ThemeData(primarySwatch: Colors.orange),
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('vi', 'VN'),
+        Locale('en', 'US'),
+      ],
+      locale: const Locale('vi', 'VN'),
       initialRoute: '/',
       routes: {
         '/': (context) => const SplashScreen(),
