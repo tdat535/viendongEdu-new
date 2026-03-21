@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
+import '../utils/snack.dart';
 
 String _vnSort(String s) => s.toLowerCase()
     .replaceAll(RegExp(r'[àáảãạăắặằẳẵâấầẩẫậ]'), 'a')
@@ -76,18 +77,11 @@ class _GvAttendanceScreenState extends State<GvAttendanceScreen> {
       );
 
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Lưu điểm danh thành công'),
-          backgroundColor: Color(0xFF4CAF50),
-        ),
-      );
+      showSuccessSnack(context, 'Lưu điểm danh thành công');
       Navigator.pop(context);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
-      );
+      showErrorSnack(context, e.toString());
     } finally {
       if (mounted) setState(() => _saving = false);
     }

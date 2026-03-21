@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import '../components/skeleton.dart';
+import '../utils/snack.dart';
 import 'gv_attendance_screen.dart';
 import 'gv_qr_attendance_screen.dart';
 
@@ -371,9 +372,7 @@ class _ScheduleCardState extends State<_ScheduleCard> {
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
-      );
+      showErrorSnack(context, e.toString());
     } finally {
       if (mounted) setState(() => _loading = false);
     }

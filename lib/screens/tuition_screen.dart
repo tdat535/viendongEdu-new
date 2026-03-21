@@ -73,14 +73,12 @@ class _TuitionScreenState extends State<TuitionScreen> {
       final items = data
           .map((e) => TuitionItem.fromJson(e as Map<String, dynamic>))
           .toList()
-        ..sort((a, b) => a.ngayTao.compareTo(b.ngayTao));
+        ..sort((a, b) => b.ngayTao.compareTo(a.ngayTao));
 
       final seen = <String>{};
       final sems = items
           .where((t) => seen.add(t.hkma))
           .map((t) => (hkma: t.hkma, hkten: t.hkten))
-          .toList()
-          .reversed
           .toList();
 
       if (!mounted) return;
@@ -162,45 +160,34 @@ class _TuitionScreenState extends State<TuitionScreen> {
                 
                 const SizedBox(height: 16),
 
-                // Semester chips
                 if (!_loading && _semesters.isNotEmpty)
-                SizedBox(
-                  height: 36,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: _semesters.length,
-                    itemBuilder: (context, i) {
-                      final sem = _semesters[i];
-                      final isSelected = sem.hkma == _selectedHkma;
-                      return GestureDetector(
-                        onTap: () =>
-                            setState(() => _selectedHkma = sem.hkma),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          margin: const EdgeInsets.only(right: 10),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: isSelected
-                                ? Colors.white
-                                : Colors.white.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Text(
-                            sem.hkten,
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                              color: isSelected
-                                  ? Color(0xFFE65100)
-                                  : Colors.white,
-                            ),
-                          ),
-                        ),
-                      );
-                    },
+                  Container(
+                    padding: const EdgeInsets.only(left: 14, right: 6, top: 6, bottom: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(24),
+                      boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 2))],
+                    ),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        value: _selectedHkma,
+                        dropdownColor: Colors.white,
+                        borderRadius: BorderRadius.circular(14),
+                        iconEnabledColor: const Color(0xFFE65100),
+                        icon: const Icon(Icons.expand_more_rounded, size: 20),
+                        isDense: true,
+                        style: const TextStyle(color: Color(0xFF333333), fontSize: 13, fontWeight: FontWeight.w500),
+                        selectedItemBuilder: (_) => _semesters.map((s) => Center(
+                          child: Text(s.hkten, style: const TextStyle(color: Color(0xFFE65100), fontSize: 13, fontWeight: FontWeight.w600)),
+                        )).toList(),
+                        items: _semesters.map((s) => DropdownMenuItem(
+                          value: s.hkma,
+                          child: Text(s.hkten),
+                        )).toList(),
+                        onChanged: (v) { if (v != null) setState(() => _selectedHkma = v); },
+                      ),
+                    ),
                   ),
-                ),
               ],
             ),
           ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import '../services/api_service.dart';
+import '../utils/snack.dart';
 
 String _vnSort(String s) => s
     .toLowerCase()
@@ -82,9 +83,7 @@ class _GvQrAttendanceScreenState extends State<GvQrAttendanceScreen> {
     } catch (e) {
       if (!mounted) return;
       setState(() => _loadingList = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
-      );
+      showErrorSnack(context, e.toString());
     }
   }
 
@@ -415,20 +414,13 @@ class _QrReviewScreenState extends State<_QrReviewScreen> {
       );
 
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Lưu điểm danh thành công'),
-          backgroundColor: Color(0xFF4CAF50),
-        ),
-      );
+      showSuccessSnack(context, 'Lưu điểm danh thành công');
       // Pop cả 2 màn hình về schedule
       Navigator.pop(context);
       Navigator.pop(context);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
-      );
+      showErrorSnack(context, e.toString());
     } finally {
       if (mounted) setState(() => _saving = false);
     }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
+import '../utils/snack.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
   const ChangePasswordScreen({super.key});
@@ -36,21 +37,11 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
         newpass: _newCtrl.text.trim(),
       );
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Đổi mật khẩu thành công!'),
-          backgroundColor: Color(0xFF4CAF50),
-        ),
-      );
+      showSuccessSnack(context, 'Đổi mật khẩu thành công!');
       Navigator.pop(context);
     } on ApiException catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.message),
-          backgroundColor: const Color(0xFFF44336),
-        ),
-      );
+      showErrorSnack(context, e.message);
     } finally {
       if (mounted) setState(() => _loading = false);
     }

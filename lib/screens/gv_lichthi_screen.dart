@@ -70,7 +70,7 @@ class _GvLichThiScreenState extends State<GvLichThiScreen> {
       list.sort((a, b) {
         final da = a['ngayThi'] as String? ?? '';
         final db = b['ngayThi'] as String? ?? '';
-        return da.compareTo(db);
+        return db.compareTo(da);
       });
       setState(() {
         _exams = list;
@@ -133,37 +133,31 @@ class _GvLichThiScreenState extends State<GvLichThiScreen> {
                 ),
                 if (!_loadingHocKy && _semesters.isNotEmpty) ...[
                   const SizedBox(height: 14),
-                  SizedBox(
-                    height: 36,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: _semesters.length,
-                      itemBuilder: (ctx, i) {
-                        final sem = _semesters[i];
-                        final isSelected = sem.id == _selected?.id;
-                        return GestureDetector(
-                          onTap: () { if (!isSelected) _fetchExams(sem); },
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 200),
-                            margin: const EdgeInsets.only(right: 10),
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: isSelected
-                                  ? Colors.white
-                                  : Colors.white.withValues(alpha: 0.2),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Text(
-                              sem.ten,
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: isSelected ? const Color(0xFFE65100) : Colors.white,
-                              ),
-                            ),
-                          ),
-                        );
-                      },
+                  Container(
+                    padding: const EdgeInsets.only(left: 14, right: 6, top: 6, bottom: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(24),
+                      boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 2))],
+                    ),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<_Semester>(
+                        value: _selected,
+                        dropdownColor: Colors.white,
+                        borderRadius: BorderRadius.circular(14),
+                        iconEnabledColor: const Color(0xFFE65100),
+                        icon: const Icon(Icons.expand_more_rounded, size: 20),
+                        isDense: true,
+                        style: const TextStyle(color: Color(0xFF333333), fontSize: 13, fontWeight: FontWeight.w500),
+                        selectedItemBuilder: (_) => _semesters.map((s) => Center(
+                          child: Text(s.ten, style: const TextStyle(color: Color(0xFFE65100), fontSize: 13, fontWeight: FontWeight.w600)),
+                        )).toList(),
+                        items: _semesters.map((s) => DropdownMenuItem(
+                          value: s,
+                          child: Text(s.ten),
+                        )).toList(),
+                        onChanged: (s) { if (s != null && s.id != _selected?.id) _fetchExams(s); },
+                      ),
                     ),
                   ),
                 ],

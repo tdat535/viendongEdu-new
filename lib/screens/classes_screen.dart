@@ -156,40 +156,31 @@ class _ClassesScreenState extends State<ClassesScreen> {
                 // ),
                 const SizedBox(height: 16),
                 if (!_loading && _semesters.isNotEmpty)
-                  SizedBox(
-                    height: 36,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: _semesters.length,
-                      itemBuilder: (context, i) {
-                        final sem = _semesters[i];
-                        final isSelected = sem.id == _selected?.id;
-                        return GestureDetector(
-                          onTap: () => _selectSemester(sem),
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 200),
-                            margin: const EdgeInsets.only(right: 10),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: isSelected
-                                  ? Colors.white
-                                  : Colors.white.withValues(alpha: 0.2),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Text(
-                              sem.ten,
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: isSelected
-                                    ? Color(0xFFE65100)
-                                    : Colors.white,
-                              ),
-                            ),
-                          ),
-                        );
-                      },
+                  Container(
+                    padding: const EdgeInsets.only(left: 14, right: 6, top: 6, bottom: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(24),
+                      boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 2))],
+                    ),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<_Semester>(
+                        value: _selected,
+                        dropdownColor: Colors.white,
+                        borderRadius: BorderRadius.circular(14),
+                        iconEnabledColor: const Color(0xFFE65100),
+                        icon: const Icon(Icons.expand_more_rounded, size: 20),
+                        isDense: true,
+                        style: const TextStyle(color: Color(0xFF333333), fontSize: 13, fontWeight: FontWeight.w500),
+                        selectedItemBuilder: (_) => _semesters.map((s) => Center(
+                          child: Text(s.ten, style: const TextStyle(color: Color(0xFFE65100), fontSize: 13, fontWeight: FontWeight.w600)),
+                        )).toList(),
+                        items: _semesters.map((s) => DropdownMenuItem(
+                          value: s,
+                          child: Text(s.ten),
+                        )).toList(),
+                        onChanged: (s) { if (s != null) _selectSemester(s); },
+                      ),
                     ),
                   ),
               ],
@@ -744,29 +735,31 @@ class _ClassDetailScreenState extends State<_ClassDetailScreen> {
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 10),
                   child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Text('Buổi ${i + 1}',
-                          style: const TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.grey)),
-                      const SizedBox(width: 10),
-                      const Icon(Icons.calendar_today,
-                          size: 12, color: Color(0xFFE65100)),
-                      const SizedBox(width: 4),
-                      Text(dateStr,
-                          style: const TextStyle(
-                              fontSize: 12, color: Colors.grey)),
-                      // if (start.isNotEmpty) ...[
-                      //   const SizedBox(width: 8),
-                      //   const Icon(Icons.access_time,
-                      //       size: 12, color: Color(0xFFE65100)),
-                      //   const SizedBox(width: 4),
-                      //   Text(start,
-                      //       style: const TextStyle(
-                      //           fontSize: 12, color: Colors.grey)),
-                      // ],
-                      const Spacer(),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Buổi ${i + 1}',
+                                style: const TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.grey)),
+                            const SizedBox(height: 4),
+                            Row(
+                              children: [
+                                const Icon(Icons.calendar_today,
+                                    size: 12, color: Color(0xFFE65100)),
+                                const SizedBox(width: 4),
+                                Text(dateStr,
+                                    style: const TextStyle(
+                                        fontSize: 12, color: Colors.grey)),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
                       Container(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 8, vertical: 3),

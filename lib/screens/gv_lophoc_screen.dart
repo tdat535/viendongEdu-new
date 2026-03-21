@@ -177,30 +177,29 @@ class _GvLopHocScreenState extends State<GvLopHocScreen> {
                 if (!_loadingHocKy && _semesters.isNotEmpty) ...[
                   const SizedBox(height: 14),
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                    padding: const EdgeInsets.only(left: 14, right: 6, top: 6, bottom: 6),
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(12),
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(24),
+                      boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 2))],
                     ),
                     child: DropdownButtonHideUnderline(
                       child: DropdownButton<_Semester>(
                         value: _selected,
-                        dropdownColor: const Color(0xFFE65100),
-                        iconEnabledColor: Colors.white,
-                        style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600),
-                        items: _semesters
-                            .map((s) => DropdownMenuItem(
-                                  value: s,
-                                  child: Text(s.ten),
-                                ))
-                            .toList(),
-                        onChanged: (s) {
-                          if (s != null) _fetchClasses(s);
-                        },
+                        dropdownColor: Colors.white,
+                        borderRadius: BorderRadius.circular(14),
+                        iconEnabledColor: const Color(0xFFE65100),
+                        icon: const Icon(Icons.expand_more_rounded, size: 20),
+                        isDense: true,
+                        style: const TextStyle(color: Color(0xFF333333), fontSize: 13, fontWeight: FontWeight.w500),
+                        selectedItemBuilder: (_) => _semesters.map((s) => Center(
+                          child: Text(s.ten, style: const TextStyle(color: Color(0xFFE65100), fontSize: 13, fontWeight: FontWeight.w600)),
+                        )).toList(),
+                        items: _semesters.map((s) => DropdownMenuItem(
+                          value: s,
+                          child: Text(s.ten),
+                        )).toList(),
+                        onChanged: (s) { if (s != null) _fetchClasses(s); },
                       ),
                     ),
                   ),

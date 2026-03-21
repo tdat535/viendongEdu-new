@@ -70,15 +70,13 @@ class _ExamScreenState extends State<ExamScreen> {
 
       final exams = data.map((e) => ExamItem.fromJson(e as Map<String, dynamic>)).toList();
       // Sắp xếp theo ngày thi
-      exams.sort((a, b) => a.ngayThi.compareTo(b.ngayThi));
+      exams.sort((a, b) => b.ngayThi.compareTo(a.ngayThi));
 
       // Lấy danh sách học kỳ duy nhất, giữ thứ tự mới → cũ
       final seen = <String>{};
       final semesters = exams
           .map((e) => (hkma: e.hkma, hkten: e.hkten))
           .where((s) => seen.add(s.hkma))
-          .toList()
-          .reversed
           .toList();
 
       if (!mounted) return;
@@ -96,6 +94,7 @@ class _ExamScreenState extends State<ExamScreen> {
 
   List<ExamItem> get _filtered =>
       _allExams.where((e) => e.hkma == _selectedHkma).toList();
+
 
   @override
   Widget build(BuildContext context) {
@@ -146,43 +145,44 @@ class _ExamScreenState extends State<ExamScreen> {
                 // ),
                 const SizedBox(height: 16),
 
-                // Semester chips
+                // Semester dropdown
                 if (!_loading && _semesters.isNotEmpty)
-                  SizedBox(
-                    height: 36,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: _semesters.length,
-                      itemBuilder: (context, i) {
-                        final sem = _semesters[i];
-                        final isSelected = sem.hkma == _selectedHkma;
-                        return GestureDetector(
-                          onTap: () =>
-                              setState(() => _selectedHkma = sem.hkma),
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 200),
-                            margin: const EdgeInsets.only(right: 10),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: isSelected
-                                  ? Colors.white
-                                  : Colors.white.withValues(alpha: 0.2),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Text(
-                              sem.hkten,
-                              style: TextStyle(
+                  Container(
+                    padding: const EdgeInsets.only(left: 14, right: 6, top: 6, bottom: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(24),
+                      boxShadow: const [
+                        BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 2)),
+                      ],
+                    ),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        value: _selectedHkma,
+                        dropdownColor: Colors.white,
+                        borderRadius: BorderRadius.circular(14),
+                        iconEnabledColor: const Color(0xFFE65100),
+                        icon: const Icon(Icons.expand_more_rounded, size: 20),
+                        isDense: true,
+                        style: const TextStyle(
+                          color: Color(0xFF333333),
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        selectedItemBuilder: (_) => _semesters.map((s) => Center(
+                          child: Text(s.hkten,
+                              style: const TextStyle(
+                                color: Color(0xFFE65100),
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
-                                color: isSelected
-                                    ? Color(0xFFE65100)
-                                    : Colors.white,
-                              ),
-                            ),
-                          ),
-                        );
-                      },
+                              )),
+                        )).toList(),
+                        items: _semesters.map((s) => DropdownMenuItem(
+                          value: s.hkma,
+                          child: Text(s.hkten),
+                        )).toList(),
+                        onChanged: (v) { if (v != null) setState(() => _selectedHkma = v); },
+                      ),
                     ),
                   ),
               ],
