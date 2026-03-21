@@ -121,7 +121,7 @@ class _TuitionScreenState extends State<TuitionScreen> {
 
     return Scaffold(
       backgroundColor: Colors.grey[100],
-      body: Column(
+      body: SafeArea(top: false, child: Column(
         children: [
           // ── Header ──
           Container(
@@ -129,7 +129,7 @@ class _TuitionScreenState extends State<TuitionScreen> {
             padding: const EdgeInsets.fromLTRB(16, 48, 16, 20),
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                colors: [Color(0xFFFF8C00), Color(0xFFFFB347)],
+                colors: [Color(0xFFE65100), Color(0xFFFF8C00)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -159,11 +159,7 @@ class _TuitionScreenState extends State<TuitionScreen> {
                   ],
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  'MSSV: ${AppSession.instance.hocVien?.mshv ?? ''}',
-                  style: const TextStyle(
-                      color: Colors.white70, fontSize: 13),
-                ),
+                
                 const SizedBox(height: 16),
 
                 // Semester chips
@@ -196,7 +192,7 @@ class _TuitionScreenState extends State<TuitionScreen> {
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
                               color: isSelected
-                                  ? Colors.orange
+                                  ? Color(0xFFE65100)
                                   : Colors.white,
                             ),
                           ),
@@ -212,7 +208,7 @@ class _TuitionScreenState extends State<TuitionScreen> {
           Expanded(
             child: _loading
                 ? const Center(
-                    child: CircularProgressIndicator(color: Colors.orange))
+                    child: CircularProgressIndicator(color: Color(0xFFE65100)))
                 : _error != null
                     ? Center(
                         child: Column(
@@ -228,7 +224,7 @@ class _TuitionScreenState extends State<TuitionScreen> {
                             ElevatedButton(
                               onPressed: _fetch,
                               style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.orange),
+                                  backgroundColor: Color(0xFFE65100)),
                               child: const Text('Thử lại',
                                   style: TextStyle(color: Colors.white)),
                             ),
@@ -280,7 +276,7 @@ class _TuitionScreenState extends State<TuitionScreen> {
             ),
           ),
         ],
-      ),
+      )),
     );
   }
 }
@@ -329,7 +325,7 @@ class _SummarySection extends StatelessWidget {
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             gradient: const LinearGradient(
-              colors: [Color(0xFFFF8C00), Color(0xFFFFB347)],
+              colors: [Color(0xFFE65100), Color(0xFFFF8C00)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -684,7 +680,7 @@ class _TransactionCardState extends State<_TransactionCard> {
                           children: [
                             const Icon(Icons.circle,
                                 size: 6,
-                                color: Colors.orange),
+                                color: Color(0xFFE65100)),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Column(

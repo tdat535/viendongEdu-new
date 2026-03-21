@@ -3,6 +3,7 @@ import '../services/app_session.dart';
 import '../services/api_service.dart';
 import '../components/menu_item.dart';
 import '../components/skeleton.dart';
+import 'gv_profile_info_screen.dart';
 
 ({String label, Color color}) _gvBuoiInfo(String? b) => switch (b) {
       'S' => (label: 'Sáng', color: const Color(0xFF2196F3)),
@@ -348,119 +349,113 @@ class _GvHomeScreenState extends State<GvHomeScreen> {
 
       // ── Tab Profile ──
       Container(
-        color: Colors.grey[100],
+        color: Colors.white,
         child: Column(
           children: [
+            // Header
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(20, 44, 20, 10),
+              padding: const EdgeInsets.fromLTRB(20, 48, 20, 24),
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   colors: [Color(0xFFE65100), Color(0xFFFF8C00)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
-                borderRadius:
-                    BorderRadius.vertical(bottom: Radius.circular(24)),
+                borderRadius: BorderRadius.vertical(bottom: Radius.circular(28)),
               ),
               child: Row(
                 children: [
                   Container(
-                    width: 60,
-                    height: 60,
+                    width: 64,
+                    height: 64,
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.25),
                       shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 2),
+                      border: Border.all(color: Colors.white, width: 2.5),
                     ),
-                    child: const Icon(Icons.person,
-                        color: Colors.white, size: 36),
+                    child: const Icon(Icons.person, color: Colors.white, size: 36),
                   ),
-                  const SizedBox(width: 14),
+                  const SizedBox(width: 16),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         gv?.ten ?? '–',
                         style: const TextStyle(
-                          fontSize: 17,
+                          fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
                       ),
-                      const SizedBox(height: 3),
+                      const SizedBox(height: 4),
                       Text(
-                        'Mã GV: $userid',
-                        style: const TextStyle(
-                            fontSize: 13, color: Colors.white70),
+                        userid,
+                        style: const TextStyle(fontSize: 14, color: Colors.white70),
                       ),
                     ],
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 16),
+
+            // Menu
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
                 child: Column(
                   children: [
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: const [
-                          BoxShadow(
-                              color: Colors.black12,
-                              blurRadius: 8,
-                              offset: Offset(0, 4)),
-                        ],
-                      ),
-                      child: Column(
-                        children: [
-                          _InfoRow(
-                              icon: Icons.badge_outlined,
-                              label: 'Mã GV',
-                              value: userid),
-                          _Divider(),
-                          _InfoRow(
-                              icon: Icons.phone_outlined,
-                              label: 'SĐT',
-                              value: gv?.sdt ?? '–'),
-                          _Divider(),
-                          _InfoRow(
-                              icon: Icons.email_outlined,
-                              label: 'Email',
-                              value: gv?.email ?? '–'),
-                        ],
-                      ),
+                    _ProfileMenuCard(
+                      icon: Icons.person_outline,
+                      label: 'Thông tin cá nhân',
+                      onTap: () {
+                        if (gv != null) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => GvProfileInfoScreen(
+                                  gv: gv!, userid: userid),
+                            ),
+                          );
+                        }
+                      },
                     ),
-                    const SizedBox(height: 24),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: ElevatedButton.icon(
-                        onPressed: _logout,
-                        icon: const Icon(Icons.logout, color: Colors.white),
-                        label: const Text(
-                          'Đăng xuất',
-                          style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFE65100),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14)),
-                          elevation: 4,
-                        ),
-                      ),
+                    const SizedBox(height: 10),
+                    _ProfileMenuCard(
+                      icon: Icons.lock_outline,
+                      label: 'Đổi mật khẩu',
+                      onTap: () =>
+                          Navigator.pushNamed(context, '/change_password'),
+                    ),
+                    const SizedBox(height: 10),
+                    _ProfileMenuCard(
+                      icon: Icons.logout,
+                      label: 'Đăng xuất',
+                      color: const Color(0xFFF44336),
+                      onTap: _logout,
                     ),
                   ],
                 ),
+              ),
+            ),
+
+            // Footer
+            const Padding(
+              padding: EdgeInsets.fromLTRB(16, 0, 16, 32),
+              child: Column(
+                children: [
+                  Text(
+                    'Phần mềm Viendongedu phiên bản 1.1.43',
+                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: 2),
+                  Text(
+                    'Thuộc bản quyền Cao đẳng Viễn Đông',
+                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
               ),
             ),
           ],
@@ -471,7 +466,9 @@ class _GvHomeScreenState extends State<GvHomeScreen> {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       body: tabs[_currentIndex],
-      bottomNavigationBar: Container(
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Container(
         height: 64,
         decoration: const BoxDecoration(
           color: Colors.white,
@@ -499,6 +496,7 @@ class _GvHomeScreenState extends State<GvHomeScreen> {
             ),
           ],
         ),
+      ),
       ),
     );
   }
@@ -613,6 +611,59 @@ class _GvClassChip extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _ProfileMenuCard extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  final Color color;
+
+  const _ProfileMenuCard({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.color = const Color(0xFFE65100),
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.grey[100],
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.grey[300]!, width: 1),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.12),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, color: color, size: 20),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Text(label,
+                    style: const TextStyle(
+                        fontSize: 15, fontWeight: FontWeight.w600)),
+              ),
+              Icon(Icons.chevron_right, color: Colors.grey[400], size: 22),
+            ],
+          ),
+        ),
       ),
     );
   }

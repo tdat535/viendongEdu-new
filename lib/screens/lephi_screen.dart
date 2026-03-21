@@ -86,7 +86,7 @@ class _LePhiScreenState extends State<LePhiScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100],
-      body: Column(
+      body: SafeArea(top: false, child: Column(
         children: [
           // ── Header ──
           Container(
@@ -94,7 +94,7 @@ class _LePhiScreenState extends State<LePhiScreen> {
             padding: const EdgeInsets.fromLTRB(16, 48, 16, 20),
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                colors: [Color(0xFFFF8C00), Color(0xFFFFB347)],
+                colors: [Color(0xFFE65100), Color(0xFFFF8C00)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -125,7 +125,7 @@ class _LePhiScreenState extends State<LePhiScreen> {
           Expanded(
             child: _loading
                 ? const Center(
-                    child: CircularProgressIndicator(color: Colors.orange))
+                    child: CircularProgressIndicator(color: Color(0xFFE65100)))
                 : _error != null
                     ? Center(
                         child: Column(
@@ -141,7 +141,7 @@ class _LePhiScreenState extends State<LePhiScreen> {
                             ElevatedButton(
                               onPressed: _fetch,
                               style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.orange),
+                                  backgroundColor: Color(0xFFE65100)),
                               child: const Text('Thử lại',
                                   style: TextStyle(color: Colors.white)),
                             ),
@@ -172,8 +172,8 @@ class _LePhiScreenState extends State<LePhiScreen> {
                                 decoration: BoxDecoration(
                                   gradient: const LinearGradient(
                                     colors: [
-                                      Color(0xFFFF8C00),
-                                      Color(0xFFFFB347)
+                                      Color(0xFFE65100),
+                                      Color(0xFFFF8C00)
                                     ],
                                     begin: Alignment.topLeft,
                                     end: Alignment.bottomRight,
@@ -228,7 +228,7 @@ class _LePhiScreenState extends State<LePhiScreen> {
                           ),
           ),
         ],
-      ),
+      )),
     );
   }
 }
@@ -261,7 +261,7 @@ class _LePhiCard extends StatelessWidget {
               shape: BoxShape.circle,
             ),
             child: const Icon(Icons.receipt_long,
-                color: Colors.orange, size: 20),
+                color: Color(0xFFE65100), size: 20),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -297,7 +297,7 @@ class _LePhiCard extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
-                  color: Colors.orange,
+                  color: Color(0xFFE65100),
                 ),
               ),
               const SizedBox(height: 2),

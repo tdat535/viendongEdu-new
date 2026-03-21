@@ -73,7 +73,7 @@ class _GvScheduleScreenState extends State<GvScheduleScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100],
-      body: Column(
+      body: SafeArea(top: false, child: Column(
         children: [
           // ── Header ──
           Container(
@@ -196,7 +196,7 @@ class _GvScheduleScreenState extends State<GvScheduleScreen> {
                           ),
           ),
         ],
-      ),
+      )),
     );
   }
 }

@@ -4,6 +4,7 @@ import '../models/mock_data.dart';
 import '../services/api_service.dart';
 import '../services/app_session.dart';
 import '../components/menu_item.dart';
+import 'hv_profile_info_screen.dart';
 
 // Helper: "HH:mm" + 3h30 → "HH:mm"
 String _calcEndTime(String? start) {
@@ -119,7 +120,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   Row(
                     children: [
                       const Icon(Icons.calendar_today,
-                          size: 16, color: Colors.orange),
+                          size: 16, color: Color(0xFFE65100)),
                       const SizedBox(width: 6),
                       Text(
                         'Lịch học hôm nay',
@@ -143,7 +144,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: Colors.orange.withValues(alpha: 0.12),
+                    color: Color(0xFFE65100).withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Row(
@@ -153,7 +154,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         _scheduleExpanded ? 'Thu gọn' : 'Mở rộng',
                         style: const TextStyle(
                           fontSize: 11,
-                          color: Colors.orange,
+                          color: Color(0xFFE65100),
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -162,7 +163,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         _scheduleExpanded
                             ? Icons.keyboard_arrow_up
                             : Icons.keyboard_arrow_down,
-                        color: Colors.orange,
+                        color: Color(0xFFE65100),
                         size: 16,
                       ),
                     ],
@@ -181,7 +182,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 width: 20,
                 height: 20,
                 child: CircularProgressIndicator(
-                    strokeWidth: 2, color: Colors.orange),
+                    strokeWidth: 2, color: Color(0xFFE65100)),
               ),
             ),
           )
@@ -209,7 +210,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     Icon(
                       n == 0 ? Icons.event_available : Icons.event_note,
                       size: 18,
-                      color: n == 0 ? Colors.green : Colors.orange,
+                      color: n == 0 ? Colors.green : Color(0xFFE65100),
                     ),
                     const SizedBox(width: 8),
                     Expanded(
@@ -302,7 +303,7 @@ class _HomeScreenState extends State<HomeScreen> {
             padding: const EdgeInsets.fromLTRB(20, 44, 20, 10),
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                colors: [Color(0xFFFF8C00), Color(0xFFFFB347)],
+                colors: [Color(0xFFE65100), Color(0xFFFF8C00)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -415,7 +416,7 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: const EdgeInsets.fromLTRB(20, 44, 20, 10),
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Color(0xFFFF8C00), Color(0xFFFFB347)],
+                  colors: [Color(0xFFE65100), Color(0xFFFF8C00)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -455,7 +456,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
               child: QrImageView(
-                data: '$_name | $_mssv',
+                data: _mssv,
                 size: 220,
               ),
             ),
@@ -471,146 +472,107 @@ class _HomeScreenState extends State<HomeScreen> {
 
       // ──────────── Profile ────────────
       Container(
-        color: Colors.grey[100],
+        color: Colors.white,
         child: Column(
           children: [
+            // Header
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(20, 44, 20, 10),
+              padding: const EdgeInsets.fromLTRB(20, 48, 20, 24),
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Color(0xFFFF8C00), Color(0xFFFFB347)],
+                  colors: [Color(0xFFE65100), Color(0xFFFF8C00)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
-                borderRadius:
-                    BorderRadius.vertical(bottom: Radius.circular(24)),
+                borderRadius: BorderRadius.vertical(bottom: Radius.circular(28)),
               ),
               child: Row(
                 children: [
                   Container(
-                    width: 60,
-                    height: 60,
+                    width: 64,
+                    height: 64,
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.3),
+                      color: Colors.white.withValues(alpha: 0.25),
                       shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 2),
+                      border: Border.all(color: Colors.white, width: 2.5),
                     ),
-                    child: const Icon(Icons.person,
-                        color: Colors.white, size: 36),
+                    child: const Icon(Icons.person, color: Colors.white, size: 36),
                   ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          _name,
-                          style: const TextStyle(
-                            fontSize: 17,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
+                  const SizedBox(width: 16),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _name,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
                         ),
-                        const SizedBox(height: 3),
-                        Text(
-                          'MSSV: $_mssv',
-                          style: const TextStyle(
-                              fontSize: 13, color: Colors.white70),
-                        ),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        _mssv,
+                        style: const TextStyle(fontSize: 14, color: Colors.white70),
+                      ),
+                    ],
                   ),
-                  // GestureDetector(
-                  //   onTap: _showEditSheet,
-                  //   child: Container(
-                  //     padding: const EdgeInsets.all(8),
-                  //     decoration: BoxDecoration(
-                  //       color: Colors.white.withValues(alpha: 0.2),
-                  //       shape: BoxShape.circle,
-                  //     ),
-                  //     child: const Icon(Icons.edit,
-                  //         color: Colors.white, size: 18),
-                  //   ),
-                  // ),
                 ],
               ),
             ),
-            const SizedBox(height: 16),
+
+            // Menu
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: const [
-                      BoxShadow(
-                          color: Colors.black12,
-                          blurRadius: 8,
-                          offset: Offset(0, 4)),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      _InfoRow(
-                          icon: Icons.school,
-                          label: 'Khóa học',
-                          value: _khoahoc),
-                      _Divider(),
-                      _InfoRow(
-                          icon: Icons.group,
-                          label: 'Lớp',
-                          value: _malop),
-                      _Divider(),
-                      _InfoRow(
-                          icon: Icons.cake,
-                          label: 'Ngày sinh',
-                          value: _ngaysinh),
-                      _Divider(),
-                      _InfoRow(
-                          icon: Icons.badge,
-                          label: 'CCCD',
-                          value: _cmnd),
-                      _Divider(),
-                      _InfoRow(
-                          icon: Icons.phone,
-                          label: 'Di động',
-                          value: _sdt),
-                      _Divider(),
-                      _InfoRow(
-                          icon: Icons.email_outlined,
-                          label: 'Email',
-                          value: _email),
-                    ],
-                  ),
+                padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
+                child: Column(
+                  children: [
+                    _ProfileMenuCard(
+                      icon: Icons.person_outline,
+                      label: 'Thông tin cá nhân',
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => const HvProfileInfoScreen()),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    _ProfileMenuCard(
+                      icon: Icons.lock_outline,
+                      label: 'Đổi mật khẩu',
+                      onTap: () =>
+                          Navigator.pushNamed(context, '/change_password'),
+                    ),
+                    const SizedBox(height: 10),
+                    _ProfileMenuCard(
+                      icon: Icons.logout,
+                      label: 'Đăng xuất',
+                      color: const Color(0xFFF44336),
+                      onTap: _logout,
+                    ),
+                  ],
                 ),
               ),
             ),
+
+            // Footer
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
-              child: SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton.icon(
-                  onPressed: _logout,
-                  icon: const Icon(Icons.logout, color: Colors.white),
-                  label: const Text(
-                    'Đăng xuất',
-                    style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white),
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
+              child: Column(
+                children: const [
+                  Text(
+                    'Phần mềm Viendongedu phiên bản 1.1.43',
+                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                    textAlign: TextAlign.center,
                   ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14)),
-                    elevation: 4,
+                  SizedBox(height: 2),
+                  Text(
+                    'Thuộc bản quyền Cao đẳng Viễn Đông',
+                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                    textAlign: TextAlign.center,
                   ),
-                ),
+                ],
               ),
             ),
           ],
@@ -621,7 +583,9 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       body: tabs[_currentIndex],
-      bottomNavigationBar: Stack(
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Stack(
         clipBehavior: Clip.none,
         children: [
           Container(
@@ -670,14 +634,14 @@ class _HomeScreenState extends State<HomeScreen> {
                             colors: [Colors.white, Colors.white])
                         : const LinearGradient(
                             colors: [
+                              Color(0xFFE65100),
                               Color(0xFFFF8C00),
-                              Color(0xFFFFB347),
                             ],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                           ),
                     shape: BoxShape.circle,
-                    border: Border.all(color: Colors.orange, width: 3),
+                    border: Border.all(color: Color(0xFFE65100), width: 3),
                     boxShadow: const [
                       BoxShadow(
                           color: Colors.black26,
@@ -689,13 +653,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     Icons.qr_code_rounded,
                     size: 34,
                     color:
-                        _currentIndex == 1 ? Colors.orange : Colors.white,
+                        _currentIndex == 1 ? Color(0xFFE65100) : Colors.white,
                   ),
                 ),
               ),
             ),
           ),
         ],
+      ),
       ),
     );
   }
@@ -780,14 +745,14 @@ class _ClassChip extends StatelessWidget {
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    const Icon(Icons.room, size: 12, color: Colors.orange),
+                    const Icon(Icons.room, size: 12, color: Color(0xFFE65100)),
                     const SizedBox(width: 3),
                     Text(room,
                         style: const TextStyle(
                             fontSize: 11, color: Colors.grey)),
                     const SizedBox(width: 10),
                     const Icon(Icons.person_outline,
-                        size: 12, color: Colors.orange),
+                        size: 12, color: Color(0xFFE65100)),
                     const SizedBox(width: 3),
                     Expanded(
                       child: Text(teacher,
@@ -801,6 +766,61 @@ class _ClassChip extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ── Profile menu card ─────────────────────────────────────
+class _ProfileMenuCard extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  final Color color;
+
+  const _ProfileMenuCard({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.color = const Color(0xFFE65100),
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+          decoration: BoxDecoration(
+            color: Colors.grey[100],
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.grey[300]!, width: 1),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.12),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, color: color, size: 20),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Text(label,
+                    style: const TextStyle(
+                        fontSize: 15, fontWeight: FontWeight.w600)),
+              ),
+              Icon(Icons.chevron_right, color: Colors.grey[400], size: 22),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -821,7 +841,7 @@ class _InfoRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
         children: [
-          Icon(icon, color: Colors.orange, size: 20),
+          Icon(icon, color: Color(0xFFE65100), size: 20),
           const SizedBox(width: 12),
           SizedBox(
             width: 80,
@@ -870,13 +890,13 @@ class _NavItem extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(icon,
-                color: selected ? Colors.orange : Colors.grey, size: 26),
+                color: selected ? Color(0xFFE65100) : Colors.grey, size: 26),
             const SizedBox(height: 2),
             Text(
               label,
               style: TextStyle(
                 fontSize: 11,
-                color: selected ? Colors.orange : Colors.grey,
+                color: selected ? Color(0xFFE65100) : Colors.grey,
                 fontWeight:
                     selected ? FontWeight.w600 : FontWeight.normal,
               ),

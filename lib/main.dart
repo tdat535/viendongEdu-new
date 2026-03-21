@@ -14,6 +14,7 @@ import 'screens/gv_lophoc_screen.dart';
 import 'screens/gv_lichthi_screen.dart';
 import 'screens/gv_quanly_lop_screen.dart';
 import 'screens/capbu_screen.dart';
+import 'screens/change_password_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -43,6 +44,7 @@ class MyApp extends StatelessWidget {
         '/gv_lichthi': (context) => const GvLichThiScreen(),
         '/gv_quanly_lop': (context) => const GvQuanLyLopScreen(),
         '/capbu': (context) => const CapBuScreen(),
+        '/change_password': (context) => const ChangePasswordScreen(),
       },
     );
   }

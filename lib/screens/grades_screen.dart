@@ -13,11 +13,13 @@ class GradeItem {
   final String diemchu;
   final bool datyn;
   final int solan;
+  final bool chuaHoc; // tongdiem was null in API → chưa học
 
   GradeItem.fromJson(Map<String, dynamic> j)
       : mhma = j['mhma'] as String? ?? '',
         mhten = j['mhten'] as String? ?? '',
         sotinchi = j['sotinchi'] as int? ?? 0,
+        chuaHoc = j['tongdiem'] == null,
         tongdiem = (j['tongdiem'] as num?)?.toDouble() ?? 0,
         diem4 = (j['diem4'] as num?)?.toDouble() ?? 0,
         diemchu = j['diemchu'] as String? ?? '',
@@ -28,7 +30,7 @@ class GradeItem {
         'A' => const Color(0xFF4CAF50),
         'B' => const Color(0xFF2196F3),
         'C' => const Color(0xFFFF9800),
-        'D' => const Color(0xFFFF5722),
+        'D' => Colors.grey,
         _ => const Color(0xFFF44336),
       };
 }
@@ -46,7 +48,8 @@ class _GradesScreenState extends State<GradesScreen>
   late final TabController _tabController;
 
   Map<String, dynamic> _stats = {};
-  List<GradeItem> _grades = [];
+  List<GradeItem> _grades = [];       // có điểm (tongdiem != null)
+  List<GradeItem> _chuaHoc = [];     // chưa học (tongdiem == null)
   List<Map<String, dynamic>> _chuaDat = [];
   bool _loading = true;
   String? _error;
@@ -73,13 +76,16 @@ class _GradesScreenState extends State<GradesScreen>
         ApiService.getMonHocChuaDat(),
       ]);
       if (!mounted) return;
-      final grades = (results[1] as List<dynamic>)
+      final allGrades = (results[1] as List<dynamic>)
           .map((e) => GradeItem.fromJson(e as Map<String, dynamic>))
           .toList();
-      grades.sort((a, b) => b.tongdiem.compareTo(a.tongdiem));
+      final withScore = allGrades.where((g) => !g.chuaHoc).toList()
+        ..sort((a, b) => b.tongdiem.compareTo(a.tongdiem));
+      final noScore = allGrades.where((g) => g.chuaHoc).toList();
       setState(() {
         _stats = results[0] as Map<String, dynamic>;
-        _grades = grades;
+        _grades = withScore;
+        _chuaHoc = noScore;
         _chuaDat = (results[2] as List<dynamic>)
             .map((e) => e as Map<String, dynamic>)
             .toList();
@@ -95,7 +101,7 @@ class _GradesScreenState extends State<GradesScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100],
-      body: Column(
+      body: SafeArea(top: false, child: Column(
         children: [
           // ── Header ──
           Container(
@@ -103,7 +109,7 @@ class _GradesScreenState extends State<GradesScreen>
             padding: const EdgeInsets.fromLTRB(16, 48, 16, 0),
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                colors: [Color(0xFFFF8C00), Color(0xFFFFB347)],
+                colors: [Color(0xFFE65100), Color(0xFFFF8C00)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -142,7 +148,7 @@ class _GradesScreenState extends State<GradesScreen>
                   tabs: const [
                     Tab(text: 'Tổng quan'),
                     Tab(text: 'Chi tiết'),
-                    Tab(text: 'Chưa học'),
+                    Tab(text: 'Môn học'),
                   ],
                 ),
               ],
@@ -153,7 +159,7 @@ class _GradesScreenState extends State<GradesScreen>
           Expanded(
             child: _loading
                 ? const Center(
-                    child: CircularProgressIndicator(color: Colors.orange))
+                    child: CircularProgressIndicator(color: Color(0xFFE65100)))
                 : _error != null
                     ? Center(
                         child: Column(
@@ -169,7 +175,7 @@ class _GradesScreenState extends State<GradesScreen>
                             ElevatedButton(
                               onPressed: _fetch,
                               style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.orange),
+                                  backgroundColor: Color(0xFFE65100)),
                               child: const Text('Thử lại',
                                   style: TextStyle(color: Colors.white)),
                             ),
@@ -181,12 +187,12 @@ class _GradesScreenState extends State<GradesScreen>
                         children: [
                           _OverviewTab(stats: _stats, grades: _grades),
                           _DetailTab(grades: _grades),
-                          _ChuaDatTab(items: _chuaDat),
+                          _MonHocTab(chuaDiem: _chuaHoc, chuaHoc: _chuaDat),
                         ],
                       ),
           ),
         ],
-      ),
+      )),
     );
   }
 }
@@ -218,14 +224,14 @@ class _OverviewTab extends StatelessWidget {
             padding: const EdgeInsets.all(22),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                colors: [Color(0xFFFF8C00), Color(0xFFFFB347)],
+                colors: [Color(0xFFE65100), Color(0xFFFF8C00)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.orange.withValues(alpha: 0.35),
+                  color: Color(0xFFE65100).withValues(alpha: 0.35),
                   blurRadius: 14,
                   offset: const Offset(0, 6),
                 ),
@@ -348,7 +354,7 @@ class _OverviewTab extends StatelessWidget {
                 label: 'Chưa có điểm',
                 value: '$tcChuaDiem TC',
                 icon: Icons.hourglass_empty,
-                color: Colors.orange,
+                color: Color(0xFFE65100),
               ),
             ],
           ),
@@ -496,7 +502,7 @@ class _GradeDistribution extends StatelessWidget {
     'A': Color(0xFF4CAF50),
     'B': Color(0xFF2196F3),
     'C': Color(0xFFFF9800),
-    'D': Color(0xFFFF5722),
+    'D': Colors.grey,
     'F': Color(0xFFF44336),
   };
 
@@ -698,14 +704,14 @@ class _GradeCard extends StatelessWidget {
                   Row(
                     children: [
                       const Icon(Icons.school_outlined,
-                          size: 12, color: Colors.orange),
+                          size: 12, color: Color(0xFFE65100)),
                       const SizedBox(width: 4),
                       Text('${item.sotinchi} TC',
                           style: const TextStyle(
                               fontSize: 12, color: Colors.grey)),
                       const SizedBox(width: 12),
                       const Icon(Icons.tag,
-                          size: 12, color: Colors.orange),
+                          size: 12, color: Color(0xFFE65100)),
                       const SizedBox(width: 4),
                       Text(item.mhma,
                           style: const TextStyle(
@@ -716,13 +722,13 @@ class _GradeCard extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
-                            color: Colors.orange.withValues(alpha: 0.12),
+                            color: Color(0xFFE65100).withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text('Lần ${item.solan}',
                               style: const TextStyle(
                                   fontSize: 10,
-                                  color: Colors.orange,
+                                  color: Color(0xFFE65100),
                                   fontWeight: FontWeight.w600)),
                         ),
                       ],
@@ -775,7 +781,240 @@ class _GradeCard extends StatelessWidget {
   }
 }
 
-// ── Chưa học Tab ─────────────────────────────────────────
+// ── Môn học Tab (gộp Chưa có điểm + Chưa học) ────────────
+class _MonHocTab extends StatefulWidget {
+  final List<GradeItem> chuaDiem;
+  final List<Map<String, dynamic>> chuaHoc;
+  const _MonHocTab({required this.chuaDiem, required this.chuaHoc});
+
+  @override
+  State<_MonHocTab> createState() => _MonHocTabState();
+}
+
+class _MonHocTabState extends State<_MonHocTab> {
+  int _selected = 0; // 0 = Chưa có điểm, 1 = Chưa học
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        // Toggle chips
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
+          child: Row(
+            children: [
+              Expanded(
+                child: _Chip(
+                  label: 'Chưa có điểm',
+                  count: widget.chuaDiem.length,
+                  selected: _selected == 0,
+                  onTap: () => setState(() => _selected = 0),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _Chip(
+                  label: 'Chưa học',
+                  count: widget.chuaHoc.length,
+                  selected: _selected == 1,
+                  onTap: () => setState(() => _selected = 1),
+                ),
+              ),
+            ],
+          ),
+        ),
+        // Content
+        Expanded(
+          child: _selected == 0
+              ? _ChuaHocTab(items: widget.chuaDiem)
+              : _ChuaDatTab(items: widget.chuaHoc),
+        ),
+      ],
+    );
+  }
+}
+
+class _Chip extends StatelessWidget {
+  final String label;
+  final int count;
+  final bool selected;
+  final VoidCallback onTap;
+  const _Chip({required this.label, required this.count, required this.selected, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final color = const Color(0xFFE65100);
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: selected ? color : Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: selected ? color : Colors.grey[300]!),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: selected ? Colors.white : Colors.grey[600],
+              ),
+            ),
+            const SizedBox(width: 6),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+              decoration: BoxDecoration(
+                color: selected ? Colors.white.withValues(alpha: 0.25) : Colors.grey[100],
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                '$count',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: selected ? Colors.white : Colors.grey[600],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Chưa có điểm Tab ──────────────────────────────────────
+class _ChuaHocTab extends StatelessWidget {
+  final List<GradeItem> items;
+  const _ChuaHocTab({required this.items});
+
+  @override
+  Widget build(BuildContext context) {
+    if (items.isEmpty) {
+      return const Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.hourglass_empty_rounded, size: 64, color: Colors.grey),
+            SizedBox(height: 12),
+            Text('Không có môn chưa có điểm',
+                style: TextStyle(color: Colors.grey)),
+          ],
+        ),
+      );
+    }
+
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 14, 16, 6),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE65100).withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  '${items.length} môn chưa có điểm',
+                  style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFFE65100)),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: ListView.builder(
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+            itemCount: items.length,
+            itemBuilder: (context, i) {
+              final item = items[i];
+              return Container(
+                margin: const EdgeInsets.only(bottom: 10),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                  boxShadow: const [
+                    BoxShadow(
+                        color: Colors.black12,
+                        blurRadius: 5,
+                        offset: Offset(0, 2)),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 5,
+                      height: 68,
+                      decoration: const BoxDecoration(
+                        color: Colors.grey,
+                        borderRadius: BorderRadius.horizontal(
+                            left: Radius.circular(14)),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(item.mhten,
+                                style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold)),
+                            const SizedBox(height: 4),
+                            Row(
+                              children: [
+                                const Icon(Icons.school_outlined,
+                                    size: 12, color: Color(0xFFE65100)),
+                                const SizedBox(width: 4),
+                                Text('${item.sotinchi} TC',
+                                    style: const TextStyle(
+                                        fontSize: 12, color: Colors.grey)),
+                                const SizedBox(width: 12),
+                                const Icon(Icons.tag,
+                                    size: 12, color: Color(0xFFE65100)),
+                                const SizedBox(width: 4),
+                                Text(item.mhma,
+                                    style: const TextStyle(
+                                        fontSize: 12, color: Colors.grey)),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const Padding(
+                      padding: EdgeInsets.only(right: 14),
+                      child: Text('Chưa học',
+                          style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.grey)),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ── Chưa đạt Tab ─────────────────────────────────────────
 class _ChuaDatTab extends StatelessWidget {
   final List<Map<String, dynamic>> items;
   const _ChuaDatTab({required this.items});
@@ -787,7 +1026,7 @@ class _ChuaDatTab extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.check_circle_outline, size: 64, color: Colors.green),
+            Icon(Icons.hourglass_empty_rounded, size: 64, color: Colors.grey),
             SizedBox(height: 12),
             Text('Không có môn chưa học',
                 style: TextStyle(color: Colors.grey)),
@@ -806,7 +1045,7 @@ class _ChuaDatTab extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(
                     horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: Colors.orange.withValues(alpha: 0.12),
+                  color: Color(0xFFE65100).withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
@@ -814,7 +1053,7 @@ class _ChuaDatTab extends StatelessWidget {
                   style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
-                      color: Colors.orange),
+                      color: Color(0xFFE65100)),
                 ),
               ),
             ],
@@ -834,7 +1073,7 @@ class _ChuaDatTab extends StatelessWidget {
               final (statusLabel, statusColor) = switch (trangthai) {
                 1 => ('Đang học', const Color(0xFF2196F3)),
                 2 => ('Không đạt', const Color(0xFFF44336)),
-                _ => ('Chưa học', Colors.orange),
+                _ => ('Chưa học', Color(0xFFE65100)),
               };
 
               return Container(
@@ -875,14 +1114,14 @@ class _ChuaDatTab extends StatelessWidget {
                             Row(
                               children: [
                                 const Icon(Icons.school_outlined,
-                                    size: 12, color: Colors.orange),
+                                    size: 12, color: Color(0xFFE65100)),
                                 const SizedBox(width: 4),
                                 Text('$sotinchi TC',
                                     style: const TextStyle(
                                         fontSize: 12, color: Colors.grey)),
                                 const SizedBox(width: 12),
                                 const Icon(Icons.tag,
-                                    size: 12, color: Colors.orange),
+                                    size: 12, color: Color(0xFFE65100)),
                                 const SizedBox(width: 4),
                                 Text(mhma,
                                     style: const TextStyle(

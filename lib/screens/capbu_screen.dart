@@ -38,7 +38,7 @@ class _CapBuScreenState extends State<CapBuScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100],
-      body: Column(
+      body: SafeArea(top: false, child: Column(
         children: [
           // ── Header ──
           Container(
@@ -46,7 +46,7 @@ class _CapBuScreenState extends State<CapBuScreen> {
             padding: const EdgeInsets.fromLTRB(16, 48, 16, 20),
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                colors: [Color(0xFFFF8C00), Color(0xFFFFB347)],
+                colors: [Color(0xFFE65100), Color(0xFFFF8C00)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -150,7 +150,7 @@ class _CapBuScreenState extends State<CapBuScreen> {
                           ),
           ),
         ],
-      ),
+      )),
     );
   }
 }

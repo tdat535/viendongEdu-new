@@ -139,7 +139,7 @@ class _GvLopHocScreenState extends State<GvLopHocScreen> {
 
     return Scaffold(
       backgroundColor: Colors.grey[100],
-      body: Column(
+      body: SafeArea(top: false, child: Column(
         children: [
           // ── Header ──
           Container(
@@ -257,7 +257,7 @@ class _GvLopHocScreenState extends State<GvLopHocScreen> {
                               ),
           ),
         ],
-      ),
+      )),
     );
   }
 }

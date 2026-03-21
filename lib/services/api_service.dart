@@ -267,6 +267,31 @@ class ApiService {
     return body['data'] as List<dynamic>? ?? [];
   }
 
+  // ── Đổi mật khẩu ────────────────────────────────────
+  static Future<void> changePassword({
+    required String oldpass,
+    required String newpass,
+  }) async {
+    final uri = Uri.parse('$_base/user/changepass');
+    final http.Response res;
+    try {
+      res = await http
+          .post(
+            uri,
+            headers: _headers,
+            body: jsonEncode({'oldpass': oldpass, 'newpass': newpass}),
+          )
+          .timeout(const Duration(seconds: 15));
+    } catch (e) {
+      throw ApiException('Không thể kết nối đến máy chủ.');
+    }
+    final body = _decode(res);
+    if (body['success'] != true) {
+      throw ApiException(
+          body['message']?.toString() ?? 'Đổi mật khẩu thất bại.');
+    }
+  }
+
   // ── Cấp bù ──────────────────────────────────────────
   static Future<List<dynamic>> getCapBu() async {
     final uri = Uri.parse('$_base/hocvien/capbu');
@@ -310,6 +335,20 @@ class ApiService {
     final uri = Uri.parse('$_base/hocvien/bangdiemhocky');
     final res = await _get(uri);
     return res['data'] as List<dynamic>? ?? [];
+  }
+
+  // ── Thông tin user ───────────────────────────────────
+  static Future<Map<String, dynamic>> getUserInfo() async {
+    final uri = Uri.parse('$_base/user/info');
+    final http.Response res;
+    try {
+      res = await http
+          .get(uri, headers: _headers)
+          .timeout(const Duration(seconds: 15));
+    } catch (e) {
+      throw ApiException('Không thể kết nối đến máy chủ.');
+    }
+    return _decode(res);
   }
 
   // ── Môn học chưa đạt ────────────────────────────────

@@ -96,7 +96,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
 
     return Scaffold(
       backgroundColor: Colors.grey[100],
-      body: Column(
+      body: SafeArea(top: false, child: Column(
         children: [
           // ── Header ──
           Container(
@@ -104,7 +104,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
             padding: const EdgeInsets.fromLTRB(16, 48, 16, 16),
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                colors: [Color(0xFFFF8C00), Color(0xFFFFB347)],
+                colors: [Color(0xFFE65100), Color(0xFFFF8C00)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -192,7 +192,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                                   fontSize: 11,
                                   fontWeight: FontWeight.w600,
                                   color: isSelected
-                                      ? Colors.orange
+                                      ? Color(0xFFE65100)
                                       : Colors.white,
                                 ),
                               ),
@@ -203,7 +203,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
                                   color: isSelected
-                                      ? Colors.orange
+                                      ? Color(0xFFE65100)
                                       : Colors.white,
                                 ),
                               ),
@@ -214,7 +214,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                                   margin: const EdgeInsets.only(top: 2),
                                   decoration: BoxDecoration(
                                     color: isSelected
-                                        ? Colors.orange
+                                        ? Color(0xFFE65100)
                                         : Colors.white,
                                     shape: BoxShape.circle,
                                   ),
@@ -234,11 +234,11 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
           Expanded(
             child: _loading
                 ? const Center(
-                    child: CircularProgressIndicator(color: Colors.orange),
+                    child: CircularProgressIndicator(color: Color(0xFFE65100)),
                   )
                 : classes == null
                     ? const Center(
-                        child: CircularProgressIndicator(color: Colors.orange),
+                        child: CircularProgressIndicator(color: Color(0xFFE65100)),
                       )
                     : classes.isEmpty
                         ? const Center(
@@ -262,7 +262,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                           ),
           ),
         ],
-      ),
+      )),
     );
   }
 }
@@ -280,11 +280,14 @@ class _ScheduleCard extends StatelessWidget {
     final start = data['thoigianbd']?.toString() ?? '';
     final end = _calcEnd(start);
     final hienDienYN = data['hienDienYN'];
-    final status = hienDienYN == null
-        ? 'pending'
-        : hienDienYN == true
-            ? 'present'
-            : 'absent';
+    final baonghiyn = data['baonghiyn'];
+    final status = baonghiyn == true
+        ? 'excused'
+        : hienDienYN == null
+            ? 'pending'
+            : hienDienYN == true
+                ? 'present'
+                : 'absent';
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -306,7 +309,8 @@ class _ScheduleCard extends StatelessWidget {
               color: switch (status) {
                 'present' => const Color(0xFF4CAF50),
                 'absent'  => const Color(0xFFF44336),
-                _         => const Color.fromARGB(255, 152, 152, 152),
+                'excused' => const Color(0xFF9E9E9E),
+                _         => const Color(0xFF2196F3),
               },
               borderRadius:
                   const BorderRadius.horizontal(left: Radius.circular(16)),
@@ -336,7 +340,7 @@ class _ScheduleCard extends StatelessWidget {
                   Row(
                     children: [
                       const Icon(Icons.access_time,
-                          size: 13, color: Colors.orange),
+                          size: 13, color: Color(0xFFE65100)),
                       const SizedBox(width: 4),
                       Text(
                         end.isNotEmpty ? '$start – $end' : start,
@@ -345,7 +349,7 @@ class _ScheduleCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 12),
                       const Icon(Icons.room,
-                          size: 13, color: Colors.orange),
+                          size: 13, color: Color(0xFFE65100)),
                       const SizedBox(width: 4),
                       Text(room,
                           style: const TextStyle(
@@ -356,7 +360,7 @@ class _ScheduleCard extends StatelessWidget {
                   Row(
                     children: [
                       const Icon(Icons.person_outline,
-                          size: 13, color: Colors.orange),
+                          size: 13, color: Color(0xFFE65100)),
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(teacher,
@@ -395,10 +399,16 @@ class _StatusBadge extends StatelessWidget {
           bg: const Color(0xFFFFEBEE),
           icon: Icons.cancel_outlined,
         ),
+      'excused' => (
+          label: 'Báo nghỉ',
+          color: const Color(0xFF757575),
+          bg: const Color(0xFFF5F5F5),
+          icon: Icons.event_busy_outlined,
+        ),
       _ => (
           label: 'Chưa điểm danh',
-          color: const Color(0xFF9E9E9E),
-          bg: const Color(0xFFF5F5F5),
+          color: const Color(0xFF2196F3),
+          bg: const Color(0xFFE3F2FD),
           icon: Icons.radio_button_unchecked,
         ),
     };

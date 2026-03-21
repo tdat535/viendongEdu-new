@@ -143,7 +143,7 @@ class _GvQrAttendanceScreenState extends State<GvQrAttendanceScreen> {
 
     return Scaffold(
       backgroundColor: Colors.black,
-      body: Column(
+      body: SafeArea(top: false, child: Column(
         children: [
           // ── Header ──
           Container(
@@ -325,7 +325,7 @@ class _GvQrAttendanceScreenState extends State<GvQrAttendanceScreen> {
               ),
             ),
         ],
-      ),
+      )),
     );
   }
 }
@@ -405,7 +405,7 @@ class _QrReviewScreenState extends State<_QrReviewScreen> {
 
     return Scaffold(
       backgroundColor: Colors.grey[100],
-      body: Column(
+      body: SafeArea(top: false, child: Column(
         children: [
           // ── Header ──
           Container(
@@ -584,7 +584,7 @@ class _QrReviewScreenState extends State<_QrReviewScreen> {
             ),
           ),
         ],
-      ),
+      )),
     );
   }
 }

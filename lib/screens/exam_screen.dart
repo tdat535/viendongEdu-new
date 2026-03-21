@@ -103,7 +103,7 @@ class _ExamScreenState extends State<ExamScreen> {
 
     return Scaffold(
       backgroundColor: Colors.grey[100],
-      body: Column(
+      body: SafeArea(top: false, child: Column(
         children: [
           // ── Header ──
           Container(
@@ -111,7 +111,7 @@ class _ExamScreenState extends State<ExamScreen> {
             padding: const EdgeInsets.fromLTRB(16, 48, 16, 20),
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                colors: [Color(0xFFFF8C00), Color(0xFFFFB347)],
+                colors: [Color(0xFFE65100), Color(0xFFFF8C00)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -140,10 +140,10 @@ class _ExamScreenState extends State<ExamScreen> {
                   ],
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  'MSSV: ${AppSession.instance.hocVien?.mshv ?? ''}',
-                  style: const TextStyle(color: Colors.white70, fontSize: 13),
-                ),
+                // Text(
+                //   'MSSV: ${AppSession.instance.hocVien?.mshv ?? ''}',
+                //   style: const TextStyle(color: Colors.white70, fontSize: 13),
+                // ),
                 const SizedBox(height: 16),
 
                 // Semester chips
@@ -176,7 +176,7 @@ class _ExamScreenState extends State<ExamScreen> {
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
                                 color: isSelected
-                                    ? Colors.orange
+                                    ? Color(0xFFE65100)
                                     : Colors.white,
                               ),
                             ),
@@ -193,7 +193,7 @@ class _ExamScreenState extends State<ExamScreen> {
           Expanded(
             child: _loading
                 ? const Center(
-                    child: CircularProgressIndicator(color: Colors.orange))
+                    child: CircularProgressIndicator(color: Color(0xFFE65100)))
                 : _error != null
                     ? Center(
                         child: Column(
@@ -208,7 +208,7 @@ class _ExamScreenState extends State<ExamScreen> {
                             ElevatedButton(
                               onPressed: _fetchExams,
                               style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.orange),
+                                  backgroundColor: Color(0xFFE65100)),
                               child: const Text('Thử lại',
                                   style: TextStyle(color: Colors.white)),
                             ),
@@ -237,7 +237,7 @@ class _ExamScreenState extends State<ExamScreen> {
                           ),
           ),
         ],
-      ),
+      )),
     );
   }
 }
@@ -316,21 +316,21 @@ class _ExamCard extends StatelessWidget {
                   Row(
                     children: [
                       const Icon(Icons.calendar_today,
-                          size: 13, color: Colors.orange),
+                          size: 13, color: Color(0xFFE65100)),
                       const SizedBox(width: 4),
                       Text(exam.ngayThiFormatted,
                           style: const TextStyle(
                               fontSize: 12, color: Color.fromARGB(255, 0, 0, 0))),
                       const SizedBox(width: 14),
                       const Icon(Icons.access_time,
-                          size: 13, color: Colors.orange),
+                          size: 13, color: Color(0xFFE65100)),
                       const SizedBox(width: 4),
                       Text(exam.gioBatDau,
                           style: const TextStyle(
                               fontSize: 12, color: Color.fromARGB(255, 0, 0, 0))),
                       const SizedBox(width: 14),
                       const Icon(Icons.timer_outlined,
-                          size: 13, color: Colors.orange),
+                          size: 13, color: Color(0xFFE65100)),
                       const SizedBox(width: 4),
                       Text('${exam.thoiGian} phút',
                           style: const TextStyle(
@@ -342,7 +342,7 @@ class _ExamCard extends StatelessWidget {
                   Row(
                     children: [
                       const Icon(Icons.room,
-                          size: 13, color: Colors.orange),
+                          size: 13, color: Color(0xFFE65100)),
                       const SizedBox(width: 4),
                       Text(exam.phongten,
                           style: const TextStyle(

@@ -113,7 +113,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100],
-      body: Column(
+      body: SafeArea(top: false, child: Column(
         children: [
           // ── Header ──
           Container(
@@ -121,7 +121,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
             padding: const EdgeInsets.fromLTRB(16, 48, 16, 20),
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                colors: [Color(0xFFFF8C00), Color(0xFFFFB347)],
+                colors: [Color(0xFFE65100), Color(0xFFFF8C00)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -150,10 +150,10 @@ class _ClassesScreenState extends State<ClassesScreen> {
                   ],
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  'MSSV: ${AppSession.instance.hocVien?.mshv ?? ''}',
-                  style: const TextStyle(color: Colors.white70, fontSize: 13),
-                ),
+                // Text(
+                //   'MSSV: ${AppSession.instance.hocVien?.mshv ?? ''}',
+                //   style: const TextStyle(color: Colors.white70, fontSize: 13),
+                // ),
                 const SizedBox(height: 16),
                 if (!_loading && _semesters.isNotEmpty)
                   SizedBox(
@@ -183,7 +183,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
                                 color: isSelected
-                                    ? Colors.orange
+                                    ? Color(0xFFE65100)
                                     : Colors.white,
                               ),
                             ),
@@ -199,7 +199,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
           // ── Content ──
           Expanded(
             child: _loading
-                ? skeletonList(accentColor: Colors.orange)
+                ? skeletonList(accentColor: Color(0xFFE65100))
                 : _error != null
                     ? Center(
                         child: Column(
@@ -214,7 +214,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                             ElevatedButton(
                               onPressed: _fetchSemesters,
                               style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.orange),
+                                  backgroundColor: Color(0xFFE65100)),
                               child: const Text('Thử lại',
                                   style: TextStyle(color: Colors.white)),
                             ),
@@ -222,7 +222,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                         ),
                       )
                     : _loadingClasses
-                        ? skeletonList(accentColor: Colors.orange)
+                        ? skeletonList(accentColor: Color(0xFFE65100))
                         : _classes.isEmpty
                             ? const Center(
                                 child: Column(
@@ -269,7 +269,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                               ),
           ),
         ],
-      ),
+      )),
     );
   }
 }
@@ -308,7 +308,7 @@ class _ClassCard extends StatelessWidget {
               height: 96,
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Color(0xFFFF8C00), Color(0xFFFFB347)],
+                  colors: [Color(0xFFE65100), Color(0xFFFF8C00)],
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                 ),
@@ -340,7 +340,7 @@ class _ClassCard extends StatelessWidget {
                                 horizontal: 8, vertical: 3),
                             decoration: BoxDecoration(
                               color:
-                                  Colors.orange.withValues(alpha: 0.1),
+                                  Color(0xFFE65100).withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text(
@@ -348,7 +348,7 @@ class _ClassCard extends StatelessWidget {
                               style: const TextStyle(
                                   fontSize: 11,
                                   fontWeight: FontWeight.w600,
-                                  color: Colors.orange),
+                                  color: Color(0xFFE65100)),
                             ),
                           ),
                       ],
@@ -357,7 +357,7 @@ class _ClassCard extends StatelessWidget {
                     Row(
                       children: [
                         const Icon(Icons.person_outline,
-                            size: 13, color: Colors.orange),
+                            size: 13, color: Color(0xFFE65100)),
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(item.gvten,
@@ -370,7 +370,7 @@ class _ClassCard extends StatelessWidget {
                     Row(
                       children: [
                         const Icon(Icons.tag,
-                            size: 13, color: Colors.orange),
+                            size: 13, color: Color(0xFFE65100)),
                         const SizedBox(width: 4),
                         Text(item.lmhma,
                             style: const TextStyle(
@@ -449,7 +449,7 @@ class _ClassDetailScreenState extends State<_ClassDetailScreen> {
     final item = widget.item;
     return Scaffold(
       backgroundColor: Colors.grey[100],
-      body: Column(
+      body: SafeArea(top: false, child: Column(
         children: [
           // Header
           Container(
@@ -457,7 +457,7 @@ class _ClassDetailScreenState extends State<_ClassDetailScreen> {
             padding: const EdgeInsets.fromLTRB(16, 48, 16, 20),
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                colors: [Color(0xFFFF8C00), Color(0xFFFFB347)],
+                colors: [Color(0xFFE65100), Color(0xFFFF8C00)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -487,7 +487,7 @@ class _ClassDetailScreenState extends State<_ClassDetailScreen> {
           Expanded(
             child: _loading
                 ? const Center(
-                    child: CircularProgressIndicator(color: Colors.orange))
+                    child: CircularProgressIndicator(color: Color(0xFFE65100)))
                 : SingleChildScrollView(
                     padding: const EdgeInsets.all(16),
                     child: Column(
@@ -508,7 +508,7 @@ class _ClassDetailScreenState extends State<_ClassDetailScreen> {
                   ),
           ),
         ],
-      ),
+      )),
     );
   }
 
@@ -572,7 +572,7 @@ class _ClassDetailScreenState extends State<_ClassDetailScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [Color(0xFFFF8C00), Color(0xFFFFB347)],
+                  colors: [Color(0xFFE65100), Color(0xFFFF8C00)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -685,7 +685,7 @@ class _ClassDetailScreenState extends State<_ClassDetailScreen> {
                     Row(
                       children: [
                         const Icon(Icons.layers_outlined,
-                            size: 15, color: Colors.orange),
+                            size: 15, color: Color(0xFFE65100)),
                         const SizedBox(width: 6),
                         Text('Tổng: $total buổi',
                             style: const TextStyle(
@@ -735,7 +735,7 @@ class _ClassDetailScreenState extends State<_ClassDetailScreen> {
                 : hiendien == false
                     ? ('Vắng mặt', const Color(0xFFF44336), const Color(0xFFFFEBEE), Icons.cancel_outlined)
                     : baonghi == true
-                        ? ('Báo nghỉ', Colors.orange, const Color(0xFFFFF3E0), Icons.event_busy_outlined)
+                        ? ('Báo nghỉ', Color(0xFFE65100), const Color(0xFFFFF3E0), Icons.event_busy_outlined)
                         : ('Chưa điểm danh', const Color(0xFF9E9E9E), const Color(0xFFF5F5F5), Icons.radio_button_unchecked);
 
             return Column(
@@ -752,7 +752,7 @@ class _ClassDetailScreenState extends State<_ClassDetailScreen> {
                               color: Colors.grey)),
                       const SizedBox(width: 10),
                       const Icon(Icons.calendar_today,
-                          size: 12, color: Colors.orange),
+                          size: 12, color: Color(0xFFE65100)),
                       const SizedBox(width: 4),
                       Text(dateStr,
                           style: const TextStyle(
@@ -760,7 +760,7 @@ class _ClassDetailScreenState extends State<_ClassDetailScreen> {
                       // if (start.isNotEmpty) ...[
                       //   const SizedBox(width: 8),
                       //   const Icon(Icons.access_time,
-                      //       size: 12, color: Colors.orange),
+                      //       size: 12, color: Color(0xFFE65100)),
                       //   const SizedBox(width: 4),
                       //   Text(start,
                       //       style: const TextStyle(
@@ -814,7 +814,7 @@ class _Row extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
         children: [
-          Icon(icon, color: Colors.orange, size: 20),
+          Icon(icon, color: Color(0xFFE65100), size: 20),
           const SizedBox(width: 12),
           SizedBox(
             width: 88,
