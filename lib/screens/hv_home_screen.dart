@@ -39,6 +39,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   List<Map<String, dynamic>> _todayClasses = [];
   bool _scheduleLoading = true;
+  bool _scheduleExpanded = true;
 
   @override
   void initState() {
@@ -100,26 +101,73 @@ class _HomeScreenState extends State<HomeScreen> {
     final dateLabel =
         '$dayLabel, ${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year}';
 
+    final n = _todayClasses.length;
+    final summaryText = n == 0
+        ? 'Hôm nay bạn không có lịch học nào 🎉'
+        : 'Hôm nay bạn có $n lịch học — nhấn để xem chi tiết';
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+          padding: const EdgeInsets.fromLTRB(16, 16, 8, 8),
           child: Row(
             children: [
-              const Icon(Icons.calendar_today,
-                  size: 16, color: Colors.orange),
-              const SizedBox(width: 6),
-              Text(
-                'Lịch học hôm nay',
-                style: const TextStyle(
-                    fontSize: 15, fontWeight: FontWeight.bold),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.calendar_today,
+                          size: 16, color: Colors.orange),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Lịch học hôm nay',
+                        style: const TextStyle(
+                            fontSize: 15, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    dateLabel,
+                    style: const TextStyle(fontSize: 12, color: Colors.black54, fontWeight: FontWeight.w500),
+                  ),
+                ],
               ),
               const Spacer(),
-              Text(
-                dateLabel,
-                style:
-                    const TextStyle(fontSize: 11, color: Colors.grey),
+              const SizedBox(width: 8),
+              GestureDetector(
+                onTap: () =>
+                    setState(() => _scheduleExpanded = !_scheduleExpanded),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.orange.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        _scheduleExpanded ? 'Thu gọn' : 'Mở rộng',
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: Colors.orange,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(width: 2),
+                      Icon(
+                        _scheduleExpanded
+                            ? Icons.keyboard_arrow_up
+                            : Icons.keyboard_arrow_down,
+                        color: Colors.orange,
+                        size: 16,
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ],
           ),
@@ -134,6 +182,62 @@ class _HomeScreenState extends State<HomeScreen> {
                 height: 20,
                 child: CircularProgressIndicator(
                     strokeWidth: 2, color: Colors.orange),
+              ),
+            ),
+          )
+        else if (!_scheduleExpanded)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
+            child: GestureDetector(
+              onTap: () => Navigator.pushNamed(context, '/schedule'),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: const [
+                    BoxShadow(
+                        color: Colors.black12,
+                        blurRadius: 4,
+                        offset: Offset(0, 2)),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      n == 0 ? Icons.event_available : Icons.event_note,
+                      size: 18,
+                      color: n == 0 ? Colors.green : Colors.orange,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: n == 0
+                          ? Text(summaryText,
+                              style: const TextStyle(
+                                  fontSize: 13, color: Colors.grey))
+                          : RichText(
+                              text: TextSpan(
+                                style: const TextStyle(
+                                    fontSize: 13, color: Colors.grey),
+                                children: [
+                                  const TextSpan(text: 'Hôm nay bạn có '),
+                                  TextSpan(
+                                    text: '$n',
+                                    style: const TextStyle(
+                                      color: Colors.red,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const TextSpan(
+                                      text: ' lịch học — nhấn để xem chi tiết'),
+                                ],
+                              ),
+                            ),
+                    ),
+                  ],
+                ),
               ),
             ),
           )
@@ -171,7 +275,13 @@ class _HomeScreenState extends State<HomeScreen> {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
             child: Column(
-              children: _todayClasses.map((d) => _ClassChip(data: d)).toList(),
+              children: _todayClasses
+                  .map((d) => GestureDetector(
+                        onTap: () =>
+                            Navigator.pushNamed(context, '/schedule'),
+                        child: _ClassChip(data: d),
+                      ))
+                  .toList(),
             ),
           ),
       ],

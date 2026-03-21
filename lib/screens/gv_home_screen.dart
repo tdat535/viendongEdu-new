@@ -23,6 +23,7 @@ class _GvHomeScreenState extends State<GvHomeScreen> {
 
   List<Map<String, dynamic>> _todayClasses = [];
   bool _scheduleLoading = true;
+  bool _scheduleExpanded = true;
 
   @override
   void initState() {
@@ -59,20 +60,68 @@ class _GvHomeScreenState extends State<GvHomeScreen> {
     final dateLabel =
         '${weekdays[now.weekday]}, ${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year}';
 
+    final n = _todayClasses.length;
+    final summaryText = n == 0
+        ? 'Hôm nay bạn không có lịch dạy nào 🎉'
+        : 'Hôm nay bạn có $n lịch dạy — nhấn để xem chi tiết';
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+          padding: const EdgeInsets.fromLTRB(16, 16, 8, 8),
           child: Row(
             children: [
-              const Icon(Icons.calendar_today, size: 16, color: Color(0xFFE65100)),
-              const SizedBox(width: 6),
-              const Text('Lịch dạy hôm nay',
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.calendar_today, size: 16, color: Color(0xFFE65100)),
+                      const SizedBox(width: 6),
+                      const Text('Lịch dạy hôm nay',
+                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                  const SizedBox(height: 2),
+                  Text(dateLabel,
+                      style: const TextStyle(fontSize: 12, color: Colors.black54, fontWeight: FontWeight.w500)),
+                ],
+              ),
               const Spacer(),
-              Text(dateLabel,
-                  style: const TextStyle(fontSize: 11, color: Colors.grey)),
+              const SizedBox(width: 8),
+              GestureDetector(
+                onTap: () =>
+                    setState(() => _scheduleExpanded = !_scheduleExpanded),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE65100).withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        _scheduleExpanded ? 'Thu gọn' : 'Mở rộng',
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: Color(0xFFE65100),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(width: 2),
+                      Icon(
+                        _scheduleExpanded
+                            ? Icons.keyboard_arrow_up
+                            : Icons.keyboard_arrow_down,
+                        color: const Color(0xFFE65100),
+                        size: 16,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -81,6 +130,58 @@ class _GvHomeScreenState extends State<GvHomeScreen> {
             padding: EdgeInsets.fromLTRB(16, 0, 16, 4),
             child: Column(
               children: [SkeletonChip(), SkeletonChip()],
+            ),
+          )
+        else if (!_scheduleExpanded)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
+            child: GestureDetector(
+              onTap: () => Navigator.pushNamed(context, '/gv_schedule'),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: const [
+                    BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2)),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      n == 0 ? Icons.event_available : Icons.event_note,
+                      size: 18,
+                      color: n == 0 ? Colors.green : const Color(0xFFE65100),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: n == 0
+                          ? Text(summaryText,
+                              style: const TextStyle(
+                                  fontSize: 13, color: Colors.grey))
+                          : RichText(
+                              text: TextSpan(
+                                style: const TextStyle(
+                                    fontSize: 13, color: Colors.grey),
+                                children: [
+                                  const TextSpan(text: 'Hôm nay bạn có '),
+                                  TextSpan(
+                                    text: '$n',
+                                    style: const TextStyle(
+                                      color: Colors.red,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const TextSpan(
+                                      text: ' lịch dạy — nhấn để xem chi tiết'),
+                                ],
+                              ),
+                            ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           )
         else if (_todayClasses.isEmpty)
@@ -110,7 +211,13 @@ class _GvHomeScreenState extends State<GvHomeScreen> {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
             child: Column(
-              children: _todayClasses.map((d) => _GvClassChip(data: d)).toList(),
+              children: _todayClasses
+                  .map((d) => GestureDetector(
+                        onTap: () =>
+                            Navigator.pushNamed(context, '/gv_schedule'),
+                        child: _GvClassChip(data: d),
+                      ))
+                  .toList(),
             ),
           ),
       ],
