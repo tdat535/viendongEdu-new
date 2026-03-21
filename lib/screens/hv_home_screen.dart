@@ -78,7 +78,7 @@ class _HomeScreenState extends State<HomeScreen> {
   IconData _mapStringToIcon(String? name) => switch (name) {
         'calendar_today' => Icons.calendar_today,
         'assignment' => Icons.assignment,
-        'swap_horiz' => Icons.swap_horiz,
+        'account_balance' => Icons.account_balance,
         'add_circle' => Icons.add_circle,
         'bar_chart' => Icons.bar_chart,
         'people' => Icons.people,
@@ -299,7 +299,7 @@ class _HomeScreenState extends State<HomeScreen> {
           // Header
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.fromLTRB(20, 56, 20, 20),
+            padding: const EdgeInsets.fromLTRB(20, 44, 20, 10),
             decoration: const BoxDecoration(
               gradient: LinearGradient(
                 colors: [Color(0xFFFF8C00), Color(0xFFFFB347)],
@@ -412,7 +412,7 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(20, 56, 20, 24),
+              padding: const EdgeInsets.fromLTRB(20, 44, 20, 10),
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   colors: [Color(0xFFFF8C00), Color(0xFFFFB347)],
@@ -476,7 +476,7 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(20, 48, 20, 20),
+              padding: const EdgeInsets.fromLTRB(20, 44, 20, 10),
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   colors: [Color(0xFFFF8C00), Color(0xFFFFB347)],

@@ -235,7 +235,7 @@ class _GvHomeScreenState extends State<GvHomeScreen> {
         children: [
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.fromLTRB(20, 56, 20, 24),
+            padding: const EdgeInsets.fromLTRB(20, 44, 20, 10),
             decoration: const BoxDecoration(
               gradient: LinearGradient(
                 colors: [Color(0xFFE65100), Color(0xFFFF8C00)],
@@ -353,7 +353,7 @@ class _GvHomeScreenState extends State<GvHomeScreen> {
           children: [
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(20, 48, 20, 20),
+              padding: const EdgeInsets.fromLTRB(20, 44, 20, 10),
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   colors: [Color(0xFFE65100), Color(0xFFFF8C00)],

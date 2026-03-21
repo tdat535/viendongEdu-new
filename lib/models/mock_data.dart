@@ -7,6 +7,6 @@ class MockData {
     {'icon': 'people', 'label': 'Lớp học', 'route': '/classes'},
     {'icon': 'payments', 'label': 'Học phí', 'route': '/tuition'},
     {'icon': 'receipt_long', 'label': 'Lệ phí', 'route': '/lephi'},
-    {'icon': 'swap_horiz', 'label': 'Cấp bù', 'route': '/capbu'},
+    {'icon': 'account_balance', 'label': 'Cấp bù', 'route': '/capbu'},
   ];
 }

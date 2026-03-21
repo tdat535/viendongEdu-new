@@ -46,7 +46,7 @@ class _CapBuScreenState extends State<CapBuScreen> {
             padding: const EdgeInsets.fromLTRB(16, 48, 16, 20),
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                colors: [Color(0xFFE65100), Color(0xFFFF8C00)],
+                colors: [Color(0xFFFF8C00), Color(0xFFFFB347)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -123,7 +123,7 @@ class _CapBuScreenState extends State<CapBuScreen> {
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(Icons.swap_horiz,
+                                Icon(Icons.account_balance,
                                     size: 64, color: Colors.grey),
                                 SizedBox(height: 12),
                                 Text('Không có hóa đơn cấp bù',
