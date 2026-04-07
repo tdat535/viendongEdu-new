@@ -161,7 +161,11 @@ class _LePhiScreenState extends State<LePhiScreen> {
                               ],
                             ),
                           )
-                        : ListView(
+                        : RefreshIndicator(
+                            onRefresh: _fetch,
+                            color: const Color(0xFFE65100),
+                            child: ListView(
+                            physics: const AlwaysScrollableScrollPhysics(),
                             padding:
                                 const EdgeInsets.fromLTRB(16, 16, 16, 24),
                             children: [
@@ -226,6 +230,7 @@ class _LePhiScreenState extends State<LePhiScreen> {
                               ..._items.map((t) => _LePhiCard(item: t)),
                             ],
                           ),
+                        ),
           ),
         ],
       )),

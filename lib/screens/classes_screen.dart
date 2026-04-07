@@ -245,7 +245,11 @@ class _ClassesScreenState extends State<ClassesScreen> {
                                     ),
                                   ),
                                   Expanded(
-                                    child: ListView.builder(
+                                    child: RefreshIndicator(
+                                      onRefresh: () => _selectSemester(_selected!),
+                                      color: const Color(0xFFE65100),
+                                      child: ListView.builder(
+                                      physics: const AlwaysScrollableScrollPhysics(),
                                       padding: const EdgeInsets.fromLTRB(
                                           16, 4, 16, 24),
                                       itemCount: _classes.length,
@@ -254,6 +258,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                                         item: _classes[i],
                                         semTen: _selected?.ten ?? '',
                                       ),
+                                    ),
                                     ),
                                   ),
                                 ],
@@ -363,9 +368,12 @@ class _ClassCard extends StatelessWidget {
                         const Icon(Icons.tag,
                             size: 13, color: Color(0xFFE65100)),
                         const SizedBox(width: 4),
-                        Text(item.lmhma,
-                            style: const TextStyle(
-                                fontSize: 12, color: Colors.grey)),
+                        Expanded(
+                          child: Text(item.lmhma,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                  fontSize: 12, color: Colors.grey)),
+                        ),
                       ],
                     ),
                   ],

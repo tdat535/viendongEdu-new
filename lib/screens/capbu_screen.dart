@@ -131,7 +131,11 @@ class _CapBuScreenState extends State<CapBuScreen> {
                               ],
                             ),
                           )
-                        : ListView.builder(
+                        : RefreshIndicator(
+                            onRefresh: _fetch,
+                            color: const Color(0xFFFF8C00),
+                            child: ListView.builder(
+                            physics: const AlwaysScrollableScrollPhysics(),
                             padding:
                                 const EdgeInsets.fromLTRB(16, 16, 16, 24),
                             itemCount: _items.length,
@@ -148,6 +152,7 @@ class _CapBuScreenState extends State<CapBuScreen> {
                               ),
                             ),
                           ),
+                        ),
           ),
         ],
       )),

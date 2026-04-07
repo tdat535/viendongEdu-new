@@ -218,7 +218,10 @@ class _TuitionScreenState extends State<TuitionScreen> {
                           ],
                         ),
                       )
-                    : SingleChildScrollView(
+                    : RefreshIndicator(
+                        color: const Color(0xFFE65100),
+                        onRefresh: _fetch,
+                        child: SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -262,6 +265,7 @@ class _TuitionScreenState extends State<TuitionScreen> {
               ),
             ),
           ),
+        ),
         ],
       )),
     );
@@ -296,7 +300,7 @@ class _SummarySection extends StatelessWidget {
     final badgeLabel = remaining > 0
         ? 'Còn thiếu'
         : remaining < 0
-            ? 'Đóng thừa'
+            ? 'Học phí dư'
             : 'Đã thanh toán';
     final badgeColor = remaining > 0
         ? Colors.red.withValues(alpha: 0.25)
@@ -429,7 +433,7 @@ class _SummarySection extends StatelessWidget {
                 label: remaining > 0
                     ? 'Còn thiếu'
                     : remaining < 0
-                        ? 'Đóng thừa'
+                        ? 'Học phí dư'
                         : 'Đã đủ',
                 amount: remaining.abs(),
                 color: remaining > 0

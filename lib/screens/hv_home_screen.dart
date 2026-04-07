@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:qr_flutter/qr_flutter.dart';
 import '../models/mock_data.dart';
 import '../services/api_service.dart';
@@ -6,15 +8,12 @@ import '../services/app_session.dart';
 import '../components/menu_item.dart';
 import 'hv_profile_info_screen.dart';
 
-// Helper: "HH:mm" + 3h30 → "HH:mm"
-String _calcEndTime(String? start) {
-  if (start == null || start.isEmpty) return '';
+// "1970-01-01T20:30:00.000Z" → "20:30"
+String _parseEndTime(String? raw) {
+  if (raw == null || raw.isEmpty) return '';
   try {
-    final p = start.split(':');
-    final total = int.parse(p[0]) * 60 + int.parse(p[1]) + 210;
-    final h = (total ~/ 60) % 24;
-    final m = total % 60;
-    return '${h.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')}';
+    final dt = DateTime.parse(raw).toUtc();
+    return '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
   } catch (_) {
     return '';
   }
@@ -41,11 +40,29 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Map<String, dynamic>> _todayClasses = [];
   bool _scheduleLoading = true;
   bool _scheduleExpanded = true;
+  int _unreadCount = 0;
 
   @override
   void initState() {
     super.initState();
     _loadTodaySchedule();
+    _loadUnreadCount();
+  }
+
+  Future<void> _loadUnreadCount() async {
+    final id = AppSession.instance.hocVien?.id.toString();
+    if (id == null) return;
+    try {
+      final res = await http
+          .get(Uri.parse('https://noti-backend-eight.vercel.app/api/notifications?studentID=$id'))
+          .timeout(const Duration(seconds: 10));
+      final json = jsonDecode(res.body) as Map<String, dynamic>;
+      if (json['success'] == true) {
+        final list = json['data'] as List;
+        final count = list.where((e) => e['status'] != 'read').length;
+        if (mounted) setState(() => _unreadCount = count);
+      }
+    } catch (_) {}
   }
 
   Future<void> _loadTodaySchedule() async {
@@ -361,13 +378,59 @@ class _HomeScreenState extends State<HomeScreen> {
                     ],
                   ),
                 ),
+                GestureDetector(
+                  onTap: () async {
+                    await Navigator.pushNamed(context, '/notifications');
+                    _loadUnreadCount();
+                  },
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.2),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.notifications_outlined,
+                            color: Colors.white, size: 24),
+                      ),
+                      if (_unreadCount > 0)
+                        Positioned(
+                          top: -2,
+                          right: -2,
+                          child: Container(
+                            padding: const EdgeInsets.all(3),
+                            decoration: const BoxDecoration(
+                              color: Colors.red,
+                              shape: BoxShape.circle,
+                            ),
+                            constraints: const BoxConstraints(
+                                minWidth: 18, minHeight: 18),
+                            child: Text(
+                              _unreadCount > 99 ? '99+' : '$_unreadCount',
+                              style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
 
           // Scrollable content
           Expanded(
-            child: SingleChildScrollView(
+            child: RefreshIndicator(
+              color: const Color(0xFFE65100),
+              onRefresh: _loadTodaySchedule,
+              child: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -403,6 +466,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
+        ),
         ],
       ),
 
@@ -680,7 +744,7 @@ class _ClassChip extends StatelessWidget {
     final room = data['phongten']?.toString() ?? '';
     final teacher = data['gvten']?.toString() ?? '';
     final start = data['thoigianbd']?.toString() ?? '';
-    final end = _calcEndTime(start);
+    final end = _parseEndTime(data['thoigiankt']?.toString());
     final buoi = _buoiInfo(data['buoi']?.toString());
 
     return Container(

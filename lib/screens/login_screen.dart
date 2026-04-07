@@ -3,6 +3,7 @@ import '../models/hoc_vien_model.dart';
 import '../models/giang_vien_model.dart';
 import '../services/api_service.dart';
 import '../services/app_session.dart';
+import '../services/notification_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -54,6 +55,17 @@ class _LoginScreenState extends State<LoginScreen> {
       }
 
       await AppSession.instance.persist();
+
+      // Đăng ký FCM token (chỉ sinh viên)
+      final hv = AppSession.instance.hocVien;
+      if (hv != null) {
+        NotificationService.instance.registerToken(
+          hv.id.toString(),
+          mssv: hv.mshv,
+          hoTen: hv.fullName,
+          ngaysinh: hv.ngaysinh,
+        );
+      }
 
       if (!mounted) return;
       final route = AppSession.instance.isGiangVien ? '/gv_home' : '/home';

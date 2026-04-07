@@ -129,7 +129,11 @@ class _HvProfileInfoScreenState extends State<HvProfileInfoScreen> {
                             ],
                           ),
                         )
-                      : ListView(
+                      : RefreshIndicator(
+                          onRefresh: _fetch,
+                          color: const Color(0xFFE65100),
+                          child: ListView(
+                          physics: const AlwaysScrollableScrollPhysics(),
                           padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
                           children: [
                             _Section(title: 'Thông tin cơ bản', children: [
@@ -153,6 +157,7 @@ class _HvProfileInfoScreenState extends State<HvProfileInfoScreen> {
                               _InfoRow(icon: Icons.workspace_premium_outlined, label: 'Hệ đào tạo', value: heDaoTaoTen),
                             ]),
                           ],
+                        ),
                         ),
             ),
           ],

@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 
-// "HH:mm" + 3h30 → "HH:mm"
-String _calcEnd(String start) {
+// "1970-01-01T20:30:00.000Z" → "20:30"
+String _parseEndTime(String? raw) {
+  if (raw == null || raw.isEmpty) return '';
   try {
-    final p = start.split(':');
-    final total = int.parse(p[0]) * 60 + int.parse(p[1]) + 210;
-    final h = (total ~/ 60) % 24;
-    final m = total % 60;
-    return '${h.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')}';
+    final dt = DateTime.parse(raw).toUtc();
+    return '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
   } catch (_) {
     return '';
   }
@@ -313,12 +311,15 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                               ],
                             ),
                           )
-                        : ListView.builder(
-                            padding:
-                                const EdgeInsets.fromLTRB(16, 16, 16, 24),
-                            itemCount: classes.length,
-                            itemBuilder: (context, i) =>
-                                _ScheduleCard(data: classes[i]),
+                        : RefreshIndicator(
+                            color: const Color(0xFFE65100),
+                            onRefresh: () => _fetchDate(_selectedDate),
+                            child: ListView.builder(
+                              padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+                              itemCount: classes.length,
+                              itemBuilder: (context, i) =>
+                                  _ScheduleCard(data: classes[i]),
+                            ),
                           ),
           ),
         ],
@@ -338,7 +339,7 @@ class _ScheduleCard extends StatelessWidget {
     final room = data['phongten']?.toString() ?? '';
     final teacher = data['gvten']?.toString() ?? '';
     final start = data['thoigianbd']?.toString() ?? '';
-    final end = _calcEnd(start);
+    final end = _parseEndTime(data['thoigiankt']?.toString());
     final hienDienYN = data['hienDienYN'];
     final baonghiyn = data['baonghiyn'];
     final status = baonghiyn == true

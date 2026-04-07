@@ -71,11 +71,11 @@ class GvProfileInfoScreen extends StatelessWidget {
                     _InfoRow(icon: Icons.person_outline, label: 'Họ tên', value: gv.ten),
                     _InfoRow(icon: Icons.badge_outlined, label: 'Mã GV', value: userid),
                     _InfoRow(icon: Icons.cake_outlined, label: 'Ngày sinh', value: _fmtDate(gv.ngaysinh)),
-                    _InfoRow(
-                      icon: Icons.workspace_premium_outlined,
-                      label: 'Cơ hữu',
-                      value: gv.gvcohuuyn ? 'Có' : 'Không',
-                    ),
+                    // _InfoRow(
+                    //   icon: Icons.workspace_premium_outlined,
+                    //   label: 'Cơ hữu',
+                    //   value: gv.gvcohuuyn ? 'Có' : 'Không',
+                    // ),
                   ]),
                   const SizedBox(height: 12),
                   _Section(title: 'Liên hệ', children: [

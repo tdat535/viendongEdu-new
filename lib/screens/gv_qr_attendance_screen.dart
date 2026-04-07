@@ -39,6 +39,7 @@ class _GvQrAttendanceScreenState extends State<GvQrAttendanceScreen> {
   List<Map<String, dynamic>> _students = [];
   Map<int, bool> _attendance = {};
   bool _loadingList = true;
+  bool _navigating = false;
   String? _lastScanned;
   String? _scanMessage;
   bool _scanSuccess = false;
@@ -126,6 +127,8 @@ class _GvQrAttendanceScreenState extends State<GvQrAttendanceScreen> {
   }
 
   void _goToReview() {
+    if (_navigating) return;
+    setState(() => _navigating = true);
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -137,7 +140,9 @@ class _GvQrAttendanceScreenState extends State<GvQrAttendanceScreen> {
           tkbParams: widget.tkbParams,
         ),
       ),
-    );
+    ).whenComplete(() {
+      if (mounted) setState(() => _navigating = false);
+    });
   }
 
   @override
@@ -387,10 +392,32 @@ class _QrReviewScreen extends StatefulWidget {
   State<_QrReviewScreen> createState() => _QrReviewScreenState();
 }
 
-class _QrReviewScreenState extends State<_QrReviewScreen> {
+class _QrReviewScreenState extends State<_QrReviewScreen>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+  late Map<int, bool> _attendance;
   bool _saving = false;
 
-  int get _presentCount => widget.attendance.values.where((v) => v).length;
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+    _attendance = Map<int, bool>.from(widget.attendance);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  int get _presentCount => _attendance.values.where((v) => v).length;
+
+  List<Map<String, dynamic>> get _absent =>
+      widget.students.where((s) => _attendance[s['hocvienid'] as int] != true).toList();
+
+  void _toggle(int id) =>
+      setState(() => _attendance[id] = !(_attendance[id] ?? false));
 
   Future<void> _save() async {
     setState(() => _saving = true);
@@ -404,7 +431,7 @@ class _QrReviewScreenState extends State<_QrReviewScreen> {
           'ten': s['ten'] ?? '',
           'hinhanh': s['hinhanh'],
           'diemdanhid': s['diemdanhid'],
-          'hiendienyn': widget.attendance[id] ?? false,
+          'hiendienyn': _attendance[id] ?? false,
         };
       }).toList();
 
@@ -413,9 +440,15 @@ class _QrReviewScreenState extends State<_QrReviewScreen> {
         hocviens: hocviens,
       );
 
+      if (widget.classCode.contains('CD15')) {
+        await ApiService.sendSMS(
+          subject: widget.tkbParams,
+          classData: hocviens,
+        );
+      }
+
       if (!mounted) return;
       showSuccessSnack(context, 'Lưu điểm danh thành công');
-      // Pop cả 2 màn hình về schedule
       Navigator.pop(context);
       Navigator.pop(context);
     } catch (e) {
@@ -429,6 +462,7 @@ class _QrReviewScreenState extends State<_QrReviewScreen> {
   @override
   Widget build(BuildContext context) {
     final total = widget.students.length;
+    final absent = _absent;
 
     return Scaffold(
       backgroundColor: Colors.grey[100],
@@ -439,196 +473,97 @@ class _QrReviewScreenState extends State<_QrReviewScreen> {
             // ── Header ──
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(16, 48, 16, 20),
+              padding: const EdgeInsets.fromLTRB(16, 48, 16, 0),
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   colors: [Color(0xFFE65100), Color(0xFFFF8C00)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
-                borderRadius: BorderRadius.vertical(
-                  bottom: Radius.circular(24),
-                ),
+                borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
               ),
-              child: Row(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  GestureDetector(
-                    onTap: () => Navigator.pop(context),
-                    child: const Icon(
-                      Icons.arrow_back_ios,
-                      color: Colors.white,
-                      size: 20,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          widget.subject,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 2),
-                        const Text(
-                          'Xác nhận điểm danh',
-                          style: TextStyle(fontSize: 12, color: Colors.white70),
-                        ),
-                      ],
-                    ),
-                  ),
-                  // Stats
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
+                  Row(
                     children: [
-                      _StatChip(
-                        icon: Icons.check_circle,
-                        label: '$_presentCount có mặt',
-                        color: const Color.fromARGB(255, 84, 246, 89),
+                      GestureDetector(
+                        onTap: () => Navigator.pop(context),
+                        child: const Icon(Icons.arrow_back_ios,
+                            color: Colors.white, size: 20),
                       ),
-                      const SizedBox(height: 6),
-                      _StatChip(
-                        icon: Icons.cancel,
-                        label: '${total - _presentCount} vắng',
-                        color: Colors.white,
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              widget.subject,
+                              style: const TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            Text(
+                              widget.classCode,
+                              style: const TextStyle(
+                                  color: Colors.white70, fontSize: 12),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
                       ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  TabBar(
+                    controller: _tabController,
+                    indicatorColor: Colors.white,
+                    indicatorWeight: 2.5,
+                    indicatorSize: TabBarIndicatorSize.label,
+                    dividerColor: Colors.transparent,
+                    labelColor: Colors.white,
+                    unselectedLabelColor: Colors.white54,
+                    labelStyle: const TextStyle(
+                        fontWeight: FontWeight.w700, fontSize: 13),
+                    unselectedLabelStyle: const TextStyle(
+                        fontWeight: FontWeight.w400, fontSize: 13),
+                    tabs: [
+                      Tab(text: 'Danh sách ($_presentCount / $total)'),
+                      Tab(text: 'Vắng (${absent.length})'),
                     ],
                   ),
                 ],
               ),
             ),
 
-            // ── Danh sách ──
+            // ── Tab content ──
             Expanded(
-              child: widget.students.isEmpty
-                  ? const Center(
-                      child: Text(
-                        'Không có sinh viên',
-                        style: TextStyle(color: Colors.grey),
-                      ),
-                    )
-                  : ListView.builder(
-                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                      itemCount: widget.students.length,
-                      itemBuilder: (ctx, i) {
-                        final s = widget.students[i];
-                        final id = s['hocvienid'] as int;
-                        final present = widget.attendance[id] ?? false;
-                        final ho = s['ho']?.toString() ?? '';
-                        final ten = s['ten']?.toString() ?? '';
-                        final mssv = s['mshv']?.toString() ?? '';
-
-                        return GestureDetector(
-                          onTap: () =>
-                              setState(() => widget.attendance[id] = !present),
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 180),
-                            margin: const EdgeInsets.only(bottom: 8),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 12,
-                            ),
-                            decoration: BoxDecoration(
-                              color: present
-                                  ? const Color(0xFFE8F5E9)
-                                  : Colors.white,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: present
-                                    ? const Color(0xFF4CAF50)
-                                    : const Color(0xFFEEEEEE),
-                              ),
-                              boxShadow: const [
-                                BoxShadow(
-                                  color: Colors.black12,
-                                  blurRadius: 4,
-                                  offset: Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                            child: Row(
-                              children: [
-                                Container(
-                                  width: 28,
-                                  height: 28,
-                                  decoration: BoxDecoration(
-                                    color: present
-                                        ? const Color(
-                                            0xFF4CAF50,
-                                          ).withValues(alpha: 0.15)
-                                        : const Color(0xFFFFF3E0),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      '${i + 1}',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold,
-                                        color: present
-                                            ? const Color(0xFF4CAF50)
-                                            : const Color(0xFFE65100),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        '$ho $ten'.trim(),
-                                        style: const TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        mssv,
-                                        style: const TextStyle(
-                                          fontSize: 12,
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                AnimatedSwitcher(
-                                  duration: const Duration(milliseconds: 200),
-                                  child: Icon(
-                                    present
-                                        ? Icons.check_circle_rounded
-                                        : Icons.radio_button_unchecked,
-                                    key: ValueKey(present),
-                                    color: present
-                                        ? const Color(0xFF4CAF50)
-                                        : Colors.grey[400],
-                                    size: 26,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                    ),
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  _ReviewStudentList(
+                    students: widget.students,
+                    attendance: _attendance,
+                    onTap: _toggle,
+                  ),
+                  _ReviewStudentList(
+                    students: absent,
+                    attendance: _attendance,
+                    onTap: _toggle,
+                  ),
+                ],
+              ),
             ),
 
             // ── Nút lưu ──
-            Container(
-              color: Colors.grey[100],
+            Padding(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
               child: SizedBox(
                 width: double.infinity,
-                height: 52,
+                height: 50,
                 child: ElevatedButton.icon(
                   onPressed: _saving ? null : _save,
                   icon: _saving
@@ -636,24 +571,19 @@ class _QrReviewScreenState extends State<_QrReviewScreen> {
                           width: 18,
                           height: 18,
                           child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2,
-                          ),
-                        )
+                              color: Colors.white, strokeWidth: 2))
                       : const Icon(Icons.save_rounded, color: Colors.white),
                   label: const Text(
                     'Lưu điểm danh',
                     style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white),
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFE65100),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
+                        borderRadius: BorderRadius.circular(14)),
                     elevation: 4,
                   ),
                 ),
@@ -662,6 +592,118 @@ class _QrReviewScreenState extends State<_QrReviewScreen> {
           ],
         ),
       ),
+    );
+  }
+}
+
+// ── Student list for review screen ───────────────────────
+class _ReviewStudentList extends StatelessWidget {
+  final List<Map<String, dynamic>> students;
+  final Map<int, bool> attendance;
+  final void Function(int) onTap;
+
+  const _ReviewStudentList({
+    required this.students,
+    required this.attendance,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (students.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.person_off_rounded, size: 64, color: Colors.grey[300]),
+            const SizedBox(height: 12),
+            Text('Không có sinh viên vắng',
+                style: TextStyle(color: Colors.grey[400])),
+          ],
+        ),
+      );
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+      itemCount: students.length,
+      itemBuilder: (_, i) {
+        final s = students[i];
+        final id = s['hocvienid'] as int;
+        final present = attendance[id] ?? false;
+        final ho = s['ho']?.toString() ?? '';
+        final ten = s['ten']?.toString() ?? '';
+        final name = '$ho $ten'.trim().isEmpty ? '–' : '$ho $ten'.trim();
+        final mssv = s['mshv']?.toString() ?? '';
+        final color =
+            present ? const Color(0xFF4CAF50) : const Color(0xFFF44336);
+
+        return GestureDetector(
+          onTap: () => onTap(id),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            margin: const EdgeInsets.only(bottom: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            decoration: BoxDecoration(
+              color: present ? const Color(0xFFE8F5E9) : Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: present
+                    ? const Color(0xFF4CAF50)
+                    : const Color(0xFFEEEEEE),
+                width: present ? 1.5 : 1,
+              ),
+              boxShadow: const [
+                BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 4,
+                    offset: Offset(0, 2)),
+              ],
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 28,
+                  height: 28,
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.15),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: Text('${i + 1}',
+                        style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: color)),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(name,
+                          style: const TextStyle(
+                              fontSize: 14, fontWeight: FontWeight.w600)),
+                      if (mssv.isNotEmpty)
+                        Text(mssv,
+                            style: const TextStyle(
+                                fontSize: 12, color: Colors.grey)),
+                    ],
+                  ),
+                ),
+                Icon(
+                  present
+                      ? Icons.check_circle
+                      : Icons.radio_button_unchecked,
+                  color: present ? const Color(0xFF4CAF50) : Colors.grey[400],
+                  size: 26,
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

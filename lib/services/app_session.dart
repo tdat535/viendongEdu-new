@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/hoc_vien_model.dart';
 import '../models/giang_vien_model.dart';
 import 'api_service.dart';
+import 'notification_service.dart';
 
 /// Singleton giữ trạng thái đăng nhập trong toàn app.
 class AppSession {
@@ -60,6 +61,11 @@ class AppSession {
 
   /// Xóa session khi đăng xuất
   Future<void> clear() async {
+    // Xóa FCM token trước khi clear session
+    final id = hocVien?.id.toString() ?? giangVien?.id.toString();
+    if (id != null) {
+      await NotificationService.instance.unregisterToken(id);
+    }
     token = null;
     userid = null;
     hocVien = null;

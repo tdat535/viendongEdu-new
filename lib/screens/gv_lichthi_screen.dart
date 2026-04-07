@@ -203,11 +203,18 @@ class _GvLichThiScreenState extends State<GvLichThiScreen> {
                                   ],
                                 ),
                               )
-                            : ListView.builder(
+                            : RefreshIndicator(
+                                onRefresh: () async {
+                                  if (_selected != null) await _fetchExams(_selected!);
+                                },
+                                color: const Color(0xFFE65100),
+                                child: ListView.builder(
+                                physics: const AlwaysScrollableScrollPhysics(),
                                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
                                 itemCount: _exams.length,
                                 itemBuilder: (ctx, i) => _ExamCard(data: _exams[i]),
                               ),
+                            ),
           ),
         ],
       )),

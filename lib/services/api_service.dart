@@ -358,6 +358,136 @@ class ApiService {
     return res['data'] as List<dynamic>? ?? [];
   }
 
+  // ── Đăng ký môn ─────────────────────────────────────
+  static Future<List<dynamic>> getKetQuaDangKy(int hockyid) async {
+    final uri = Uri.parse('$_base/hocvien/ketquadk').replace(
+      queryParameters: {'hockyid': hockyid.toString()},
+    );
+    final http.Response res;
+    try {
+      res = await http
+          .get(uri, headers: _headers)
+          .timeout(const Duration(seconds: 15));
+    } catch (e) {
+      throw ApiException('Không thể kết nối đến máy chủ.');
+    }
+    if (res.statusCode == 401) {
+      throw ApiException('Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.',
+          statusCode: 401);
+    }
+    try {
+      final decoded = jsonDecode(res.body);
+      if (decoded is List) return decoded;
+      if (decoded is Map && decoded['data'] is List) {
+        return decoded['data'] as List<dynamic>;
+      }
+      return [];
+    } catch (_) {
+      throw ApiException('Phản hồi không hợp lệ từ máy chủ.');
+    }
+  }
+
+  static Future<List<dynamic>> getDotDangKy(int hockyid) async {
+    final uri = Uri.parse('$_base/hocvien/dotdangky').replace(
+      queryParameters: {'hockyid': hockyid.toString()},
+    );
+    final res = await _get(uri);
+    return res['data'] as List<dynamic>? ?? [];
+  }
+
+  static Future<List<dynamic>> getMonHocDuKien(int hockyid) async {
+    final uri = Uri.parse('$_base/hocvien/monhocdukien').replace(
+      queryParameters: {'hockyid': hockyid.toString()},
+    );
+    final res = await _get(uri);
+    return res['data'] as List<dynamic>? ?? [];
+  }
+
+  static Future<void> postDangKyMon({
+    required String hocvienid,
+    required String dotdkid,
+    required String monhocid,
+    required String hockyid,
+  }) async {
+    final uri = Uri.parse('$_base/hocvien/dangky');
+    final http.Response res;
+    try {
+      res = await http
+          .post(
+            uri,
+            headers: _headers,
+            body: jsonEncode({
+              'hocvienid': hocvienid,
+              'dotdkid': dotdkid,
+              'monhocid': monhocid,
+              'hockyid': hockyid,
+            }),
+          )
+          .timeout(const Duration(seconds: 15));
+    } catch (e) {
+      throw ApiException('Không thể kết nối đến máy chủ.');
+    }
+    final body = _decode(res);
+    if (body['success'] != true) {
+      throw ApiException(body['message']?.toString() ?? 'Đăng ký thất bại.');
+    }
+  }
+
+  static Future<void> deleteDangKyMon({
+    required String hocvienid,
+    required String dotdkid,
+    required String monhocid,
+    required String hockyid,
+  }) async {
+    final uri = Uri.parse('$_base/hocvien/dangky');
+    final http.Response res;
+    try {
+      res = await http
+          .delete(
+            uri,
+            headers: _headers,
+            body: jsonEncode({
+              'hocvienid': hocvienid,
+              'dotdkid': dotdkid,
+              'monhocid': monhocid,
+              'hockyid': hockyid,
+            }),
+          )
+          .timeout(const Duration(seconds: 15));
+    } catch (e) {
+      throw ApiException('Không thể kết nối đến máy chủ.');
+    }
+    final body = _decode(res);
+    if (body['success'] != true) {
+      throw ApiException(body['message']?.toString() ?? 'Hủy đăng ký thất bại.');
+    }
+  }
+
+  // ── Send SMS (CD15) ──────────────────────────────────
+  static Future<void> sendSMS({
+    required Map<String, dynamic> subject,
+    required List<Map<String, dynamic>> classData,
+  }) async {
+    final payload = jsonEncode({'subject': subject, 'classData': classData});
+    final headers = {'Content-Type': 'application/json'};
+    final urls = [
+      'https://vido-ts-one.vercel.app/api/mobile/sendSMS',
+      'https://tuyensinhcd-dh.viendong.edu.vn/api/mobile/sendSMS',
+    ];
+
+    for (final url in urls) {
+      try {
+        await http
+            .post(Uri.parse(url), headers: headers, body: payload)
+            .timeout(const Duration(seconds: 15));
+        return; // thành công thì dừng
+      } catch (_) {
+        // thử url tiếp theo
+      }
+    }
+    // cả 2 đều lỗi → bỏ qua, không ảnh hưởng điểm danh
+  }
+
   // ── Internal helpers ─────────────────────────────────
   static Future<Map<String, dynamic>> _get(Uri uri) async {
     final http.Response res;

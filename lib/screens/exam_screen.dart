@@ -228,12 +228,15 @@ class _ExamScreenState extends State<ExamScreen> {
                               ],
                             ),
                           )
-                        : ListView.builder(
-                            padding:
-                                const EdgeInsets.fromLTRB(16, 16, 16, 24),
-                            itemCount: exams.length,
-                            itemBuilder: (context, i) =>
-                                _ExamCard(exam: exams[i]),
+                        : RefreshIndicator(
+                            color: const Color(0xFFE65100),
+                            onRefresh: _fetchExams,
+                            child: ListView.builder(
+                              padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+                              itemCount: exams.length,
+                              itemBuilder: (context, i) =>
+                                  _ExamCard(exam: exams[i]),
+                            ),
                           ),
           ),
         ],

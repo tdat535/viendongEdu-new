@@ -299,13 +299,18 @@ class _GvScheduleScreenState extends State<GvScheduleScreen> {
                               ],
                             ),
                           )
-                        : ListView.builder(
+                        : RefreshIndicator(
+                            onRefresh: () => _fetch(_selectedDate),
+                            color: const Color(0xFFE65100),
+                            child: ListView.builder(
+                            physics: const AlwaysScrollableScrollPhysics(),
                             padding: const EdgeInsets.fromLTRB(
                                 16, 16, 16, 24),
                             itemCount: _classes.length,
                             itemBuilder: (ctx, i) =>
                                 _ScheduleCard(data: _classes[i]),
                           ),
+                        ),
           ),
         ],
       )),

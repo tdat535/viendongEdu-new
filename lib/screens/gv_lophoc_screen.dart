@@ -249,11 +249,18 @@ class _GvLopHocScreenState extends State<GvLopHocScreen> {
                                   ],
                                 ),
                               )
-                            : ListView(
+                            : RefreshIndicator(
+                                onRefresh: () async {
+                                  if (_selected != null) await _fetchClasses(_selected!);
+                                },
+                                color: const Color(0xFFE65100),
+                                child: ListView(
+                                physics: const AlwaysScrollableScrollPhysics(),
                                 padding:
                                     const EdgeInsets.fromLTRB(16, 12, 16, 24),
                                 children: _buildItems(),
                               ),
+                            ),
           ),
         ],
       )),

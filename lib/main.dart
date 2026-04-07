@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'services/notification_service.dart';
 import 'screens/splash_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/hv_home_screen.dart';
@@ -16,8 +18,16 @@ import 'screens/gv_lichthi_screen.dart';
 import 'screens/gv_quanly_lop_screen.dart';
 import 'screens/capbu_screen.dart';
 import 'screens/change_password_screen.dart';
+import 'screens/registration_screen.dart';
+import 'screens/notifications_screen.dart';
 
-void main() {
+final navigatorKey = GlobalKey<NavigatorState>();
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  setNotificationNavigatorKey(navigatorKey);
+  await NotificationService.instance.init();
   runApp(const MyApp());
 }
 
@@ -26,6 +36,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: navigatorKey,
       title: 'ViendongEdu',
       theme: ThemeData(primarySwatch: Colors.orange),
       localizationsDelegates: const [
@@ -56,6 +67,8 @@ class MyApp extends StatelessWidget {
         '/gv_quanly_lop': (context) => const GvQuanLyLopScreen(),
         '/capbu': (context) => const CapBuScreen(),
         '/change_password': (context) => const ChangePasswordScreen(),
+        '/registration': (context) => const RegistrationScreen(),
+        '/notifications': (context) => const NotificationsScreen(),
       },
     );
   }

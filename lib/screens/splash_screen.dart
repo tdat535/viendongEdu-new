@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/app_session.dart';
+import '../services/notification_service.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -19,6 +20,17 @@ class _SplashScreenState extends State<SplashScreen> {
     final restored = await AppSession.instance.tryRestore();
     if (!mounted) return;
     if (restored && AppSession.instance.token != null) {
+      // Đăng ký lại token cho session cũ (app update / token refresh)
+      final hv = AppSession.instance.hocVien;
+      if (hv != null) {
+        NotificationService.instance.registerToken(
+          hv.id.toString(),
+          mssv: hv.mshv,
+          hoTen: hv.fullName,
+          ngaysinh: hv.ngaysinh,
+        );
+      }
+
       final route = AppSession.instance.isGiangVien ? '/gv_home' : '/home';
       Navigator.pushReplacementNamed(context, route);
     } else {
