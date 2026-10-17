@@ -220,7 +220,11 @@ class ApiService {
     final uri = Uri.parse('$_base/giangvien/diemdanh/luu');
     final bodyStr = jsonEncode({'tkb': tkb, 'hocviens': hocviens});
     print('🚀 [postDiemDanhLuu] URL: $uri');
-    print('📦 [postDiemDanhLuu] Payload: $bodyStr');
+    final fullStr = '📦 [postDiemDanhLuu] Payload: $bodyStr';
+    final pattern = RegExp('.{1,800}');
+    for (var match in pattern.allMatches(fullStr)) {
+      print(match.group(0));
+    }
     const maxRetries = 3;
 
     // CẢNH BÁO — endpoint này KHÔNG idempotent.
@@ -302,7 +306,16 @@ class ApiService {
       throw ApiException('Không thể kết nối đến máy chủ.');
     }
     final body = _decode(res);
-    return body['data'] as List<dynamic>? ?? [];
+    final list = body['data'] as List<dynamic>? ?? [];
+    if (list.isNotEmpty) {
+      final hieuList = list.where((s) => s['mshv'] == '2513092029').toList();
+      final hieuStr = jsonEncode(hieuList);
+      final pattern = RegExp('.{1,800}');
+      for (var match in pattern.allMatches('📥 [postDiemDanhDanhSach] Võ Trung Hiếu (từ server): $hieuStr')) {
+        print(match.group(0));
+      }
+    }
+    return list;
   }
 
   // ── Đổi mật khẩu ────────────────────────────────────

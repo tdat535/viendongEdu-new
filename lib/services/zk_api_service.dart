@@ -4,12 +4,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class ZkApiService {
   static const String _ipKey = 'zk_api_ip';
-  static const String defaultServerUrl = 'https://faceid.phungne.io.vn';
+  static const String defaultServerUrl = 'https://faceid.manhdung.dev';
 
   static Future<String> getSavedIp() async {
     final prefs = await SharedPreferences.getInstance();
     final saved = prefs.getString(_ipKey);
-    if (saved == null || saved.isEmpty) {
+    if (saved == null || saved.isEmpty || saved.contains('phungne.io.vn')) {
       return defaultServerUrl;
     }
     return saved;
@@ -22,7 +22,7 @@ class ZkApiService {
 
   static String _buildBaseUrl(String input) {
     input = input.trim();
-    if (input.isEmpty) {
+    if (input.isEmpty || input.contains('phungne.io.vn')) {
       input = defaultServerUrl;
     }
     if (input.startsWith('http://') || input.startsWith('https://')) {

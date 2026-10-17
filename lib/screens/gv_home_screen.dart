@@ -465,12 +465,7 @@ class _GvHomeScreenState extends State<GvHomeScreen> {
                         onTap: () =>
                             Navigator.pushNamed(context, '/gv_quanly_lop'),
                       ),
-                      MenuItemWidget(
-                        icon: Icons.fact_check_outlined,
-                        label: 'Điểm danh EMS',
-                        onTap: () =>
-                            Navigator.pushNamed(context, '/ems_attendance_gv'),
-                      ),
+
                     ],
                   ),
                 ],

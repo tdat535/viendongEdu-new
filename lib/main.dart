@@ -26,8 +26,7 @@ import 'screens/change_password_screen.dart';
 import 'screens/registration_screen.dart';
 import 'screens/notifications_screen.dart';
 import 'screens/student_board_screen.dart';
-import 'screens/ems_attendance_teacher_screen.dart';
-import 'screens/ems_attendance_student_screen.dart';
+
 
 final navigatorKey = GlobalKey<NavigatorState>();
 
@@ -113,8 +112,7 @@ class MyApp extends StatelessWidget {
         // ở trên: đây là một mặt kéo (pull) riêng, không thay thế chuông.
         '/student_board': (context) => const StudentBoardScreen(),
         // Điểm danh EMS — EMS là nguồn dữ liệu điểm danh chính thức.
-        '/ems_attendance_gv': (context) => const EmsAttendanceTeacherScreen(),
-        '/ems_attendance_hv': (context) => const EmsAttendanceStudentScreen(),
+
       },
     );
   }

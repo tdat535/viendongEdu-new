@@ -48,23 +48,8 @@ class NotificationService {
     }
     if (!_initialMessageReady.isCompleted) _initialMessageReady.complete();
 
-<<<<<<< HEAD
-    // Xin permission — trên iOS bước này hiện hộp thoại, phải await
-    try {
-      await _fcm.requestPermission(
-        alert: true,
-        badge: true,
-        sound: true,
-      );
-    } finally {
-      // Dù người dùng chọn "Cho phép" hay "Từ chối", vẫn báo done
-      // để registerToken không bị chờ mãi mãi
-      if (!_permissionReady.isCompleted) _permissionReady.complete();
-    }
-=======
     // Xin permission
     await _fcm.requestPermission(alert: true, badge: true, sound: true);
->>>>>>> 4844ae37e48f993805764bf4ea9fb3e256f62ca3
 
     // Đăng ký background handler
     FirebaseMessaging.onBackgroundMessage(_firebaseBackgroundHandler);
