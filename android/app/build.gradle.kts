@@ -34,8 +34,8 @@ android {
         applicationId = "com.viendong.vidostudentbeta"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
-        // Android keeps its own counter (99 = 6.0.6, owner 2026-10-19); iOS uses
-        // pubspec's build number (6.0.6 (9)).
+        // Android keeps its own counter (99 = 6.0.7, owner 2026-10-19); iOS uses
+        // pubspec's build number (6.0.7 (1)).
         versionCode = 99
         versionName = flutter.versionName
     }
