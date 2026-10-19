@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../services/api_service.dart';
-import '../services/ems_api_service.dart';
-import '../services/app_session.dart';
 import '../components/skeleton.dart';
 
 // ── Model ──────────────────────────────────────────────
@@ -114,159 +112,157 @@ class _ClassesScreenState extends State<ClassesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100],
-      body: SafeArea(top: false, child: Column(
-        children: [
-          // ── Header ──
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.fromLTRB(16, 48, 16, 20),
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xFFE65100), Color(0xFFFF8C00)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius:
-                  BorderRadius.vertical(bottom: Radius.circular(24)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    GestureDetector(
-                      onTap: () => Navigator.pop(context),
-                      child: const Icon(Icons.arrow_back_ios,
-                          color: Colors.white, size: 20),
-                    ),
-                    const SizedBox(width: 8),
-                    const Text(
-                      'Lớp học',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ],
+      body: SafeArea(
+        top: false,
+        child: Column(
+          children: [
+            // ── Header ──
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.fromLTRB(16, 48, 16, 20),
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Color(0xFFE65100), Color(0xFFFF8C00)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 ),
-                const SizedBox(height: 4),
-                // Text(
-                //   'MSSV: ${AppSession.instance.hocVien?.mshv ?? ''}',
-                //   style: const TextStyle(color: Colors.white70, fontSize: 13),
-                // ),
-                const SizedBox(height: 16),
-                if (!_loading && _semesters.isNotEmpty)
-                  Container(
-                    padding: const EdgeInsets.only(left: 14, right: 6, top: 6, bottom: 6),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(24),
-                      boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 2))],
-                    ),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<_Semester>(
-                        value: _selected,
-                        dropdownColor: Colors.white,
-                        borderRadius: BorderRadius.circular(14),
-                        iconEnabledColor: const Color(0xFFE65100),
-                        icon: const Icon(Icons.expand_more_rounded, size: 20),
-                        isDense: true,
-                        style: const TextStyle(color: Color(0xFF333333), fontSize: 13, fontWeight: FontWeight.w500),
-                        selectedItemBuilder: (_) => _semesters.map((s) => Center(
-                          child: Text(s.ten, style: const TextStyle(color: Color(0xFFE65100), fontSize: 13, fontWeight: FontWeight.w600)),
-                        )).toList(),
-                        items: _semesters.map((s) => DropdownMenuItem(
-                          value: s,
-                          child: Text(s.ten),
-                        )).toList(),
-                        onChanged: (s) { if (s != null) _selectSemester(s); },
+                borderRadius:
+                    BorderRadius.vertical(bottom: Radius.circular(24)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      GestureDetector(
+                        onTap: () => Navigator.pop(context),
+                        child: const Icon(Icons.arrow_back_ios,
+                            color: Colors.white, size: 20),
+                      ),
+                      const SizedBox(width: 8),
+                      const Text(
+                        'Lớp học',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  if (!_loading && _semesters.isNotEmpty)
+                    Container(
+                      padding: const EdgeInsets.only(
+                          left: 14, right: 6, top: 6, bottom: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(24),
+                        boxShadow: const [
+                          BoxShadow(
+                              color: Colors.black12,
+                              blurRadius: 6,
+                              offset: Offset(0, 2)),
+                        ],
+                      ),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<_Semester>(
+                          value: _selected,
+                          dropdownColor: Colors.white,
+                          borderRadius: BorderRadius.circular(14),
+                          iconEnabledColor: const Color(0xFFE65100),
+                          icon: const Icon(Icons.expand_more_rounded, size: 20),
+                          isDense: true,
+                          style: const TextStyle(
+                              color: Color(0xFF333333),
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500),
+                          selectedItemBuilder: (_) => _semesters
+                              .map((s) => Center(
+                                    child: Text(
+                                      s.ten,
+                                      style: const TextStyle(
+                                          color: Color(0xFFE65100),
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w600),
+                                    ),
+                                  ))
+                              .toList(),
+                          items: _semesters
+                              .map((s) => DropdownMenuItem(
+                                    value: s,
+                                    child: Text(s.ten),
+                                  ))
+                              .toList(),
+                          onChanged: (s) {
+                            if (s != null) _selectSemester(s);
+                          },
+                        ),
                       ),
                     ),
-                  ),
-              ],
+                ],
+              ),
             ),
-          ),
 
-          // ── Content ──
-          Expanded(
-            child: _loading
-                ? skeletonList(accentColor: Color(0xFFE65100))
-                : _error != null
-                    ? Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.error_outline,
-                                size: 48, color: Colors.grey),
-                            const SizedBox(height: 12),
-                            Text(_error!,
-                                style: const TextStyle(color: Colors.grey)),
-                            const SizedBox(height: 16),
-                            ElevatedButton(
-                              onPressed: _fetchSemesters,
-                              style: ElevatedButton.styleFrom(
-                                  backgroundColor: Color(0xFFE65100)),
-                              child: const Text('Thử lại',
-                                  style: TextStyle(color: Colors.white)),
-                            ),
-                          ],
-                        ),
-                      )
-                    : _loadingClasses
-                        ? skeletonList(accentColor: Color(0xFFE65100))
-                        : _classes.isEmpty
-                            ? const Center(
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(Icons.school_outlined,
-                                        size: 64, color: Colors.grey),
-                                    SizedBox(height: 12),
-                                    Text('Không có lớp học',
-                                        style:
-                                            TextStyle(color: Colors.grey)),
-                                  ],
-                                ),
-                              )
-                            : Column(
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.fromLTRB(
-                                        16, 14, 16, 4),
-                                    child: Row(
-                                      children: [
-                                        Text(
-                                          '${_classes.length} lớp học',
-                                          style: const TextStyle(
-                                              fontSize: 13,
-                                              color: Colors.grey),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: RefreshIndicator(
-                                      onRefresh: () => _selectSemester(_selected!),
-                                      color: const Color(0xFFE65100),
-                                      child: ListView.builder(
-                                      physics: const AlwaysScrollableScrollPhysics(),
-                                      padding: const EdgeInsets.fromLTRB(
-                                          16, 4, 16, 24),
-                                      itemCount: _classes.length,
-                                      itemBuilder: (context, i) =>
-                                          _ClassCard(
-                                        item: _classes[i],
-                                        semTen: _selected?.ten ?? '',
-                                      ),
-                                    ),
-                                    ),
-                                  ),
-                                ],
+            // ── Content ──
+            Expanded(
+              child: _loading
+                  ? skeletonList(accentColor: const Color(0xFFE65100))
+                  : _error != null
+                      ? Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.error_outline,
+                                  size: 48, color: Colors.grey),
+                              const SizedBox(height: 12),
+                              Text(_error!,
+                                  style: const TextStyle(color: Colors.grey)),
+                              const SizedBox(height: 16),
+                              ElevatedButton(
+                                onPressed: _fetchSemesters,
+                                style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFFE65100)),
+                                child: const Text('Thử lại',
+                                    style: TextStyle(color: Colors.white)),
                               ),
-          ),
-        ],
-      )),
+                            ],
+                          ),
+                        )
+                      : _loadingClasses
+                          ? skeletonList(accentColor: const Color(0xFFE65100))
+                          : _classes.isEmpty
+                              ? const Center(
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(Icons.school_outlined,
+                                          size: 64, color: Colors.grey),
+                                      SizedBox(height: 12),
+                                      Text('Không có lớp học',
+                                          style: TextStyle(color: Colors.grey)),
+                                    ],
+                                  ),
+                                )
+                              : RefreshIndicator(
+                                  color: const Color(0xFFE65100),
+                                  onRefresh: () => _selected != null
+                                      ? _selectSemester(_selected!)
+                                      : _fetchSemesters(),
+                                  child: ListView.builder(
+                                    padding: const EdgeInsets.fromLTRB(
+                                        16, 12, 16, 24),
+                                    itemCount: _classes.length,
+                                    itemBuilder: (context, i) => _ClassCard(
+                                      item: _classes[i],
+                                      semTen: _selected?.ten ?? '',
+                                    ),
+                                  ),
+                                ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -279,120 +275,123 @@ class _ClassCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (_) =>
-                _ClassDetailScreen(item: item, semTen: semTen)),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: const [
+          BoxShadow(
+              color: Colors.black12,
+              blurRadius: 6,
+              offset: Offset(0, 3)),
+        ],
       ),
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        decoration: BoxDecoration(
-          color: Colors.white,
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
           borderRadius: BorderRadius.circular(16),
-          boxShadow: const [
-            BoxShadow(
-                color: Colors.black12,
-                blurRadius: 6,
-                offset: Offset(0, 3)),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 5,
-              height: 96,
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Color(0xFFE65100), Color(0xFFFF8C00)],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (_) =>
+                    _ClassDetailScreen(item: item, semTen: semTen)),
+          ),
+          child: IntrinsicHeight(
+            child: Row(
+              children: [
+                Container(
+                  width: 5,
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Color(0xFFE65100), Color(0xFFFF8C00)],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                    ),
+                    borderRadius:
+                        BorderRadius.horizontal(left: Radius.circular(16)),
+                  ),
                 ),
-                borderRadius:
-                    BorderRadius.horizontal(left: Radius.circular(16)),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Expanded(
-                          child: Text(
-                            item.mhten,
-                            style: const TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                        if (item.sotinchi > 0)
-                          Container(
-                            margin: const EdgeInsets.only(right: 12),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 3),
-                            decoration: BoxDecoration(
-                              color:
-                                  Color(0xFFE65100).withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(20),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                item.mhten,
+                                style: const TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold),
+                              ),
                             ),
-                            child: Text(
-                              '${item.sotinchi} TC',
-                              style: const TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
-                                  color: Color(0xFFE65100)),
+                            if (item.sotinchi > 0)
+                              Container(
+                                margin: const EdgeInsets.only(right: 12),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 8, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFE65100)
+                                      .withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Text(
+                                  '${item.sotinchi} TC',
+                                  style: const TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                      color: Color(0xFFE65100)),
+                                ),
+                              ),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                        Row(
+                          children: [
+                            const Icon(Icons.person_outline,
+                                size: 14, color: Color(0xFFE65100)),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                item.gvten,
+                                style: const TextStyle(
+                                    fontSize: 12, color: Colors.grey),
+                              ),
                             ),
-                          ),
-                      ],
-                    ),
-                    const SizedBox(height: 5),
-                    Row(
-                      children: [
-                        const Icon(Icons.person_outline,
-                            size: 13, color: Color(0xFFE65100)),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          child: Text(item.gvten,
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            const Icon(Icons.tag,
+                                size: 14, color: Color(0xFFE65100)),
+                            const SizedBox(width: 6),
+                            Text(
+                              item.lmhma,
                               style: const TextStyle(
-                                  fontSize: 12, color: Colors.grey)),
+                                  fontSize: 12, color: Colors.grey),
+                            ),
+                            const Spacer(),
+                            const Icon(Icons.chevron_right,
+                                size: 18, color: Colors.grey),
+                            const SizedBox(width: 8),
+                          ],
                         ),
                       ],
                     ),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        const Icon(Icons.tag,
-                            size: 13, color: Color(0xFFE65100)),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          child: Text(item.lmhma,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                  fontSize: 12, color: Colors.grey)),
-                        ),
-                      ],
-                    ),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
-  }
-
-  String _tyLeLabel(_LopItem item) {
-    final parts = <String>[];
-    if (item.tylecc > 0) parts.add('CC ${item.tylecc}%');
-    if (item.tylegk > 0) parts.add('GK ${item.tylegk}%');
-    if (item.tyleck > 0) parts.add('CK ${item.tyleck}%');
-    return parts.join(' · ');
   }
 }
 
@@ -416,30 +415,12 @@ class _ClassDetailScreenState extends State<_ClassDetailScreen> {
     _fetchBuoiHoc();
   }
 
-  // Điểm danh giờ đọc từ EMS, KHÔNG còn từ IMS. EMS là nguồn chính thức: một
-  // buổi chỉ có mặt trong danh sách khi giáo viên đã ghi nhận trên EMS.
-  //
-  // session_key của EMS bắt đầu bằng lmhid ('<lmhid>:<tiết>:<ngày>'), nên lọc
-  // đúng lớp này bằng tiền tố. Giữ nguyên khung dữ liệu cũ (ngay / hiendienyn /
-  // baonghiyn) để tái dùng y hệt biểu đồ và danh sách buổi học sẵn có.
   Future<void> _fetchBuoiHoc() async {
     try {
-      final marks = await EmsApiService.myAttendance(limit: 300);
+      final data = await ApiService.getBuoiHoc(widget.item.lmhid);
       if (!mounted) return;
-      final prefix = '${widget.item.lmhid}:';
-      final sessions = marks
-          .where((m) => (m.sessionKey ?? '').startsWith(prefix))
-          .map((m) {
-            final st = m.status;
-            return <String, dynamic>{
-              // date-only để tránh lệch ngày khi parse mốc UTC nửa đêm
-              'ngay': (m.sessionDate ?? '').split('T').first,
-              'hiendienyn': (st == 'present' || st == 'late')
-                  ? true
-                  : (st == 'absent' ? false : null),
-              'baonghiyn': st == 'excused',
-            };
-          })
+      final sessions = data
+          .map((e) => e as Map<String, dynamic>)
           .toList()
         ..sort((a, b) {
           final da = DateTime.tryParse(a['ngay'] as String? ?? '') ?? DateTime(0);
@@ -467,66 +448,79 @@ class _ClassDetailScreenState extends State<_ClassDetailScreen> {
     final item = widget.item;
     return Scaffold(
       backgroundColor: Colors.grey[100],
-      body: SafeArea(top: false, child: Column(
-        children: [
-          // Header
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.fromLTRB(16, 48, 16, 20),
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xFFE65100), Color(0xFFFF8C00)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.vertical(bottom: Radius.circular(24)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                GestureDetector(
-                  onTap: () => Navigator.pop(context),
-                  child: const Icon(Icons.arrow_back_ios,
-                      color: Colors.white, size: 20),
+      body: SafeArea(
+        top: false,
+        child: Column(
+          children: [
+            // Header
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.fromLTRB(16, 48, 16, 20),
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Color(0xFFE65100), Color(0xFFFF8C00)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 ),
-                const SizedBox(height: 10),
-                Text(item.mhten,
-                    style: const TextStyle(
-                        fontSize: 19,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white)),
-                const SizedBox(height: 4),
-                Text(widget.semTen,
-                    style: const TextStyle(
-                        color: Colors.white70, fontSize: 13)),
-              ],
-            ),
-          ),
-          Expanded(
-            child: _loading
-                ? const Center(
-                    child: CircularProgressIndicator(color: Color(0xFFE65100)))
-                : SingleChildScrollView(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      children: [
-                        _infoCard(item),
-                        const SizedBox(height: 16),
-                        if (_hasGrades) ...[
-                          _gradeCard(item),
-                          const SizedBox(height: 16),
-                        ],
-                        if (_sessions.isNotEmpty) ...[
-                          _attendanceCard(),
-                          const SizedBox(height: 16),
-                          _sessionListCard(),
-                        ],
-                      ],
-                    ),
+                borderRadius: BorderRadius.vertical(bottom: Radius.circular(24)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      GestureDetector(
+                        onTap: () => Navigator.pop(context),
+                        child: const Icon(Icons.arrow_back_ios,
+                            color: Colors.white, size: 20),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          item.mhten,
+                          style: const TextStyle(
+                              fontSize: 19,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
                   ),
-          ),
-        ],
-      )),
+                  const SizedBox(height: 6),
+                  Text(widget.semTen,
+                      style: const TextStyle(
+                          color: Colors.white70, fontSize: 13)),
+                ],
+              ),
+            ),
+            Expanded(
+              child: _loading
+                  ? const Center(
+                      child: CircularProgressIndicator(color: Color(0xFFE65100)))
+                  : SingleChildScrollView(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        children: [
+                          _infoCard(item),
+                          const SizedBox(height: 16),
+                          if (_hasGrades) ...[
+                            _gradeCard(item),
+                            const SizedBox(height: 16),
+                          ],
+                          if (_sessions.isNotEmpty) ...[
+                            _attendanceCard(),
+                            const SizedBox(height: 16),
+                            _sessionListCard(),
+                          ],
+                        ],
+                      ),
+                    ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -744,7 +738,6 @@ class _ClassDetailScreenState extends State<_ClassDetailScreen> {
             final dateStr = ngay != null
                 ? '${ngay.day.toString().padLeft(2, '0')}/${ngay.month.toString().padLeft(2, '0')}/${ngay.year}'
                 : '';
-            //final start = s['thoigianbd'] as String? ?? '';
             final hiendien = s['hiendienyn'];
             final baonghi = s['baonghiyn'];
 
@@ -753,7 +746,7 @@ class _ClassDetailScreenState extends State<_ClassDetailScreen> {
                 : hiendien == false
                     ? ('Vắng mặt', const Color(0xFFF44336), const Color(0xFFFFEBEE), Icons.cancel_outlined)
                     : baonghi == true
-                        ? ('Báo nghỉ', Color(0xFFE65100), const Color(0xFFFFF3E0), Icons.event_busy_outlined)
+                        ? ('Báo nghỉ', const Color(0xFFE65100), const Color(0xFFFFF3E0), Icons.event_busy_outlined)
                         : ('Chưa điểm danh', const Color(0xFF9E9E9E), const Color(0xFFF5F5F5), Icons.radio_button_unchecked);
 
             return Column(
@@ -762,31 +755,20 @@ class _ClassDetailScreenState extends State<_ClassDetailScreen> {
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 10),
                   child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Buổi ${i + 1}',
-                                style: const TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.grey)),
-                            const SizedBox(height: 4),
-                            Row(
-                              children: [
-                                const Icon(Icons.calendar_today,
-                                    size: 12, color: Color(0xFFE65100)),
-                                const SizedBox(width: 4),
-                                Text(dateStr,
-                                    style: const TextStyle(
-                                        fontSize: 12, color: Colors.grey)),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
+                      Text('Buổi ${i + 1}',
+                          style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.grey)),
+                      const SizedBox(width: 10),
+                      const Icon(Icons.calendar_today,
+                          size: 12, color: Color(0xFFE65100)),
+                      const SizedBox(width: 4),
+                      Text(dateStr,
+                          style: const TextStyle(
+                              fontSize: 12, color: Colors.grey)),
+                      const Spacer(),
                       Container(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 8, vertical: 3),
@@ -834,7 +816,7 @@ class _Row extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
         children: [
-          Icon(icon, color: Color(0xFFE65100), size: 20),
+          Icon(icon, color: const Color(0xFFE65100), size: 20),
           const SizedBox(width: 12),
           SizedBox(
             width: 88,
